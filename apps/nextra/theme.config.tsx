@@ -1,5 +1,6 @@
 /* eslint sort-keys: error */
 import { useConfig } from "nextra-theme-docs";
+import { docsConfig } from "@docs-config";
 
 interface FrontmatterConfig {
   description?: string;
@@ -26,7 +27,7 @@ const config = {
     content: function useBanner() {
       return (
         <div>
-          🎉 Welcome to the new Aptos Docs!{" "}
+          🎉 Welcome to the new Plode Tech Docs!{" "}
           <a
             className="text-blue-400 dark:text-blue-400 hover:underline"
             target="_blank"
@@ -74,7 +75,7 @@ const config = {
   head: function useHead() {
     let ogImage: string;
     let twitterImage: string;
-    const url = new URL("https://plode.io");
+    const url = new URL(docsConfig.origin);
     const imagePath = "/api/og.png";
     const title = `Plode Docs | Plode Docs`;
 
