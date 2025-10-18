@@ -29,5 +29,10 @@
       "glob": "^11.0.1",
       "vite": "^6.2.6"
     }
+  },
+  "devDependencies": {
+    "@types/node": "^24.8.1",
+    "eslint-config": "workspace:*",
+    "typescript-config": "workspace:*"
   }
 }
