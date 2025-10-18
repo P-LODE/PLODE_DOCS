@@ -55,6 +55,9 @@ importers:
       '@vercel/edge':
         specifier: ^1.2.2
         version: 1.2.2
+      '@vercel/og':
+        specifier: ^0.8.5
+        version: 0.8.5
       '@vercel/speed-insights':
         specifier: ^1.2.0
         version: 1.2.0(next@15.5.6(@babel/core@7.28.4)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)
@@ -73,6 +76,9 @@ importers:
       firebase:
         specifier: ^12.4.0
         version: 12.4.0
+      jose:
+        specifier: ^6.1.0
+        version: 6.1.0
       lucide-react:
         specifier: ^0.546.0
         version: 0.546.0(react@19.2.0)
@@ -109,6 +115,9 @@ importers:
       remark-math:
         specifier: ^6.0.0
         version: 6.0.0
+      satori-html:
+        specifier: ^0.3.2
+        version: 0.3.2
       starlight-links-validator:
         specifier: ^0.18.1
         version: 0.18.1(@astrojs/starlight@0.36.1(astro@5.14.6(@types/node@24.8.1)(@vercel/functions@2.2.13)(jiti@2.6.1)(lightningcss@1.30.1)(rollup@4.52.4)(typescript@5.9.3)(yaml@2.8.1)))
@@ -131,6 +140,12 @@ importers:
       '@types/node':
         specifier: ^24.8.1
         version: 24.8.1
+      '@types/react':
+        specifier: ^19.2.2
+        version: 19.2.2
+      '@types/react-dom':
+        specifier: ^19.2.2
+        version: 19.2.2(@types/react@19.2.2)
       eslint-config:
         specifier: workspace:*
         version: link:packages/eslint-config
@@ -5098,6 +5113,9 @@ packages:
   jju@1.4.0:
     resolution: {integrity: sha512-8wb9Yw966OSxApiCt0K3yNJL8pnNeIv+OEq2YMidz4FKP6nonSRoOXc80iXY4JaN2FC11B9qsNmDsm+ZOfMROA==}
 
+  jose@6.1.0:
+    resolution: {integrity: sha512-TTQJyoEoKcC1lscpVDCSsVgYzUDg/0Bt3WE//WiTPK6uOCQC2KZS4MpugbMWt/zyjkopgZoXhZuCi00gLudfUA==}
+
   joycon@3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
     engines: {node: '>=10'}
@@ -6470,6 +6488,9 @@ packages:
 
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
+
+  satori-html@0.3.2:
+    resolution: {integrity: sha512-wjTh14iqADFKDK80e51/98MplTGfxz2RmIzh0GqShlf4a67+BooLywF17TvJPD6phO0Hxm7Mf1N5LtRYvdkYRA==}
 
   satori@0.16.0:
     resolution: {integrity: sha512-ZvHN3ygzZ8FuxjSNB+mKBiF/NIoqHzlBGbD0MJiT+MvSsFOvotnWOhdTjxKzhHRT2wPC1QbhLzx2q/Y83VhfYQ==}
@@ -12977,6 +12998,8 @@ snapshots:
 
   jju@1.4.0: {}
 
+  jose@6.1.0: {}
+
   joycon@3.1.1: {}
 
   js-tokens@4.0.0: {}
@@ -14840,6 +14863,10 @@ snapshots:
       is-regex: 1.2.1
 
   safer-buffer@2.1.2: {}
+
+  satori-html@0.3.2:
+    dependencies:
+      ultrahtml: 1.6.0
 
   satori@0.16.0:
     dependencies:
