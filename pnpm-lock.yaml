@@ -70,6 +70,9 @@ importers:
       astro-mermaid:
         specifier: ^1.1.0
         version: 1.1.0(astro@5.14.6(@types/node@24.8.1)(@vercel/functions@2.2.13)(jiti@2.6.1)(lightningcss@1.30.1)(rollup@4.52.4)(typescript@5.9.3)(yaml@2.8.1))(mermaid@11.12.0)
+      firebase:
+        specifier: ^12.4.0
+        version: 12.4.0
       lucide-react:
         specifier: ^0.546.0
         version: 0.546.0(react@19.2.0)
