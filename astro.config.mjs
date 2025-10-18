@@ -9,17 +9,17 @@ import starlightDocSearch from "@astrojs/starlight-docsearch";
 import mermaid from "astro-mermaid";
 
 import vercel from "@astrojs/vercel";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
+// import remarkMath from "remark-math";
+// import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import sitemap from "@astrojs/sitemap";
 import partytown from "@astrojs/partytown";
 import node from "@astrojs/node";
 import react from "@astrojs/react";
 import starlightLlmsTxt from "starlight-llms-txt";
-import favicons from "astro-favicons";
+// import favicons from "astro-favicons";
 import icon from "astro-icon";
-import { sidebar } from "./astro.sidebar.ts";
+// import { sidebar } from "./astro.sidebar.ts";
 import { ENV } from "./src/lib/env";
 import { ogImagesIntegration } from "./src/integrations/ogImages";
 import { SUPPORTED_LANGUAGES, SITE_TITLES } from "./src/config/18n";
@@ -71,11 +71,11 @@ export default defineConfig({
     firebaseIntegration(),
     starlight({
       title: SITE_TITLES,
-      logo: {
-        light: "~/assets/aptos-logomark-light.svg",
-        dark: "~/assets/aptos-logomark-dark.svg",
-        replacesTitle: false,
-      },
+      // logo: {
+      //   light: "~/assets/aptos-logomark-light.svg",
+      //   dark: "~/assets/aptos-logomark-dark.svg",
+      //   replacesTitle: false,
+      // },
       editLink: {
         baseUrl: "https://github.com/aptos-labs/aptos-docs/edit/main/",
       },
@@ -115,18 +115,18 @@ export default defineConfig({
         //{ label: "Reddit", icon: "reddit", href: "https://www.reddit.com/r/Aptos" },
         { label: "Telegram", icon: "telegram", href: "https://t.me/aptos" },
       ],
-      components: {
-        Head: "./src/starlight-overrides/Head.astro",
-        Header: "./src/starlight-overrides/Header.astro",
-        Hero: "./src/starlight-overrides/Hero.astro",
-        LanguageSelect: "./src/starlight-overrides/LanguageSelect.astro",
-        MobileMenuToggle: "./src/starlight-overrides/MobileMenuToggle.astro",
-        PageFrame: "./src/starlight-overrides/PageFrame.astro",
-        PageSidebar: "./src/starlight-overrides/PageSidebar.astro",
-        PageTitle: "./src/starlight-overrides/PageTitle.astro",
-        Sidebar: "./src/starlight-overrides/Sidebar.astro",
-        TwoColumnContent: "./src/starlight-overrides/TwoColumnContent.astro",
-      },
+      // components: {
+      //   Head: "./src/starlight-overrides/Head.astro",
+      //   Header: "./src/starlight-overrides/Header.astro",
+      //   Hero: "./src/starlight-overrides/Hero.astro",
+      //   LanguageSelect: "./src/starlight-overrides/LanguageSelect.astro",
+      //   MobileMenuToggle: "./src/starlight-overrides/MobileMenuToggle.astro",
+      //   PageFrame: "./src/starlight-overrides/PageFrame.astro",
+      //   PageSidebar: "./src/starlight-overrides/PageSidebar.astro",
+      //   PageTitle: "./src/starlight-overrides/PageTitle.astro",
+      //   Sidebar: "./src/starlight-overrides/Sidebar.astro",
+      //   TwoColumnContent: "./src/starlight-overrides/TwoColumnContent.astro",
+      // },
       plugins: [
         starlightLinksValidator({
           errorOnFallbackPages: false,
@@ -179,8 +179,8 @@ export default defineConfig({
             ]
           : []),
       ],
-      sidebar,
-      customCss: ["./src/styles/global.css", "katex/dist/katex.min.css"],
+      // sidebar,
+      customCss: ["./src/styles/global.css" /*, "katex/dist/katex.min.css" */],
     }),
     sitemap({
       serialize(item) {
@@ -201,19 +201,19 @@ export default defineConfig({
       experimentalReactChildren: true,
       include: ["**/GraphQLEditor.tsx", "**/chat-widget/**/*.tsx"],
     }),
-    favicons({
-      name: "Aptos Docs",
-      name_localized: SITE_TITLES,
-      short_name: "Aptos",
-      icons: {
-        android: true,
-        appleIcon: true,
-        appleStartup: true,
-        favicons: false,
-        windows: true,
-        yandex: true,
-      },
-    }),
+    // favicons({
+    //   name: "Aptos Docs",
+    //   name_localized: SITE_TITLES,
+    //   short_name: "Aptos",
+    //   icons: {
+    //     android: true,
+    //     appleIcon: true,
+    //     appleStartup: true,
+    //     favicons: false,
+    //     windows: true,
+    //     yandex: true,
+    //   },
+    // }),
     icon({
       include: {
         ph: [
@@ -262,7 +262,7 @@ export default defineConfig({
   },
   markdown: {
     remarkPlugins: [
-      remarkMath,
+      // remarkMath,
       [
         remarkClientOnly,
         {
@@ -273,7 +273,7 @@ export default defineConfig({
         },
       ],
     ],
-    rehypePlugins: [rehypeRaw, rehypeKatex],
+    rehypePlugins: [rehypeRaw /*, rehypeKatex */],
   },
   prefetch: true,
   image: {
