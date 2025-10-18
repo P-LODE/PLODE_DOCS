@@ -46,6 +46,9 @@ importers:
       '@iconify/json':
         specifier: ^2.2.397
         version: 2.2.397
+      '@nanostores/react':
+        specifier: ^1.0.0
+        version: 1.0.0(nanostores@1.0.1)(react@19.2.0)
       '@tailwindcss/vite':
         specifier: ^4.1.14
         version: 4.1.14(vite@6.4.0(@types/node@24.8.1)(jiti@2.6.1)(lightningcss@1.30.1)(yaml@2.8.1))
@@ -73,6 +76,9 @@ importers:
       astro-mermaid:
         specifier: ^1.1.0
         version: 1.1.0(astro@5.14.6(@types/node@24.8.1)(@vercel/functions@2.2.13)(jiti@2.6.1)(lightningcss@1.30.1)(rollup@4.52.4)(typescript@5.9.3)(yaml@2.8.1))(mermaid@11.12.0)
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
       firebase:
         specifier: ^12.4.0
         version: 12.4.0
@@ -1579,6 +1585,13 @@ packages:
   '@n1ru4l/push-pull-async-iterable-iterator@3.2.0':
     resolution: {integrity: sha512-3fkKj25kEjsfObL6IlKPAlHYPq/oYwUkkQ03zsTTiDjD7vg/RxjdiLeCydqtxHZP0JgsXL3D/X5oAkMGzuUp/Q==}
     engines: {node: '>=12'}
+
+  '@nanostores/react@1.0.0':
+    resolution: {integrity: sha512-eDduyNy+lbQJMg6XxZ/YssQqF6b4OXMFEZMYKPJCCmBevp1lg0g+4ZRi94qGHirMtsNfAWKNwsjOhC+q1gvC+A==}
+    engines: {node: ^20.0.0 || >=22.0.0}
+    peerDependencies:
+      nanostores: ^0.9.0 || ^0.10.0 || ^0.11.0 || ^1.0.0
+      react: '>=18.0.0'
 
   '@napi-rs/simple-git-android-arm-eabi@0.1.22':
     resolution: {integrity: sha512-JQZdnDNm8o43A5GOzwN/0Tz3CDBQtBUNqzVwEopm32uayjdjxev1Csp1JeaqF3v9djLDIvsSE39ecsN2LhCKKQ==}
@@ -9084,6 +9097,11 @@ snapshots:
   '@microsoft/tsdoc@0.14.2': {}
 
   '@n1ru4l/push-pull-async-iterable-iterator@3.2.0': {}
+
+  '@nanostores/react@1.0.0(nanostores@1.0.1)(react@19.2.0)':
+    dependencies:
+      nanostores: 1.0.1
+      react: 19.2.0
 
   '@napi-rs/simple-git-android-arm-eabi@0.1.22':
     optional: true

@@ -1,0 +1,37 @@
+---
+import { GTAG_ID } from "astro:env/client";
+import VercelAnalytics from "@vercel/analytics/astro";
+import SpeedInsights from "@vercel/speed-insights/astro";
+
+const isProduction = import.meta.env.VERCEL_ENV === "production";
+const isVercel = import.meta.env.VERCEL;
+---
+
+{
+  isProduction && (
+    <>
+      <script
+        is:inline
+        type="text/partytown"
+        src={`https://www.googletagmanager.com/gtag/js?id=${GTAG_ID}`}
+      />
+      <script is:inline type="text/partytown" is:raw define:vars={{ GTAG_ID }}>
+        window.dataLayer = window.dataLayer || []; function gtag()
+        {
+          // eslint-disable-next-line prefer-rest-params
+          window.dataLayer.push(arguments)
+        }
+        gtag("js", new Date()); gtag("config", GTAG_ID);
+      </script>
+    </>
+  )
+}
+
+{
+  isVercel && (
+    <>
+      <VercelAnalytics />
+      <SpeedInsights />
+    </>
+  )
+}

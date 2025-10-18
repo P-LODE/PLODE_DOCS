@@ -1,3 +1,10 @@
 {
+  "compilerOptions": {
+      "jsx": "react",
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["src/*"]
+      }
+  },
   "extends": "typescript-config/base.json"
 }

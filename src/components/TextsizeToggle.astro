@@ -1,0 +1,63 @@
+---
+import { Select } from "@/components/react/Select/Select";
+---
+
+<starlight-text-size>
+  <Select
+    client:load
+    label="Text size"
+    value="normal"
+    options={[
+      { label: "Normal", value: "normal" },
+      { label: "Large", value: "large" },
+    ]}
+    width="6.5em"
+    onChange={(value: string) => {}}
+  />
+</starlight-text-size>
+
+<script is:inline>
+  window.StarlightTextSizeProvider.updatePickers();
+</script>
+
+<script>
+  declare global {
+    interface Window {
+      StarlightTextSizeProvider: {
+        updatePickers: (size?: string) => void;
+      };
+    }
+  }
+
+  type TextSize = "normal" | "large";
+  const storageKey = "text-size";
+  const parseTextSize = (size: unknown): TextSize =>
+    size === "normal" || size === "large" ? size : "normal";
+
+  const loadTextSize = (): TextSize =>
+    parseTextSize(typeof localStorage !== "undefined" && localStorage.getItem(storageKey));
+
+  function storeTextSize(size: TextSize): void {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(storageKey, size);
+    }
+  }
+
+  class StarlightTextSize extends HTMLElement {
+    constructor() {
+      super();
+      const select = this.querySelector("select");
+      if (!select) return;
+
+      const storedSize = loadTextSize();
+      select.value = storedSize;
+
+      select.addEventListener("change", () => {
+        const newSize = parseTextSize(select.value);
+        storeTextSize(newSize);
+        window.StarlightTextSizeProvider.updatePickers(newSize);
+      });
+    }
+  }
+  customElements.define("starlight-text-size", StarlightTextSize);
+</script>
