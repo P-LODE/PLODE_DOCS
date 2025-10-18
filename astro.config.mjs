@@ -4,7 +4,7 @@ import { defineConfig, envField } from "astro/config";
 import starlight from "@astrojs/starlight";
 import tailwindcss from "@tailwindcss/vite";
 import starlightLinksValidator from "starlight-links-validator";
-import starlightOpenAPI from "starlight-openapi";
+// import starlightOpenAPI from "starlight-openapi";
 import starlightDocSearch from "@astrojs/starlight-docsearch";
 import mermaid from "astro-mermaid";
 
@@ -27,7 +27,7 @@ import { firebaseIntegration } from "./src/integrations/firebase";
 import { remarkClientOnly } from "./src/plugins";
 import { devServerFileWatcher } from "./src/integrations/dev-server-file-watcher";
 import onDemandDirective from "./src/integrations/client-on-demand/register.js";
-import { cspConfig } from "./src/config/csp";
+// import { cspConfig } from "./src/config/csp";
 import { monacoEditorIntegration } from "./src/integrations/monacoEditor";
 // import { isMoveReferenceEnabled } from "./src/utils/isMoveReferenceEnabled";
 // import { rehypeAddDebug } from "./src/plugins";
@@ -37,7 +37,7 @@ const ALGOLIA_SEARCH_API_KEY = ENV.ALGOLIA_SEARCH_API_KEY;
 const ALGOLIA_INDEX_NAME = ENV.ALGOLIA_INDEX_NAME;
 
 const hasAlgoliaConfig = ALGOLIA_APP_ID && ALGOLIA_SEARCH_API_KEY && ALGOLIA_INDEX_NAME;
-const enableApiReference = true;
+const enableApiReference = false; // Temporarily disabled
 
 // https://astro.build/config
 export default defineConfig({
@@ -166,19 +166,16 @@ export default defineConfig({
         // Generate the OpenAPI documentation pages if enabled
         ...(enableApiReference
           ? [
-              starlightOpenAPI(
-                [
-                  {
-                    base: "rest-api",
-                    label: "REST API Reference",
-                    schema: "./public/aptos-spec.json",
-                    sidebarMethodBadges: true,
-                  },
-                ],
-                {
-                  routeEntrypoint: "./src/components/OpenAPI/Route.astro",
-                },
-              ),
+              // starlightOpenAPI(
+              //   [
+              //     {
+              //       base: "rest-api",
+              //       label: "REST API Reference",
+              //       schema: "./public/aptos-spec.json",
+              //       sidebarMethodBadges: true,
+              //     },
+              //   ],
+              // ),
             ]
           : []),
       ],
@@ -237,9 +234,9 @@ export default defineConfig({
   ],
   adapter: process.env.VERCEL
     ? vercel({
-        experimentalStaticHeaders: {
-          cspMode: "global",
-        },
+        // experimentalStaticHeaders: {
+        //   cspMode: "global",
+        // },
         edgeMiddleware: false,
         imageService: true,
         imagesConfig: {
@@ -322,30 +319,30 @@ export default defineConfig({
     validateSecrets: true,
   },
   experimental: {
-    csp: cspConfig,
-    fonts: [
-      {
-        provider: "local",
-        name: "Atkinson Hyperlegible Next",
-        cssVariable: "--font-atkinson-hyperlegible-next",
-        variants: [
-          {
-            weight: "200 800",
-            style: "normal",
-            src: ["./src/assets/fonts/AtkinsonHyperlegibleNext-VariableFont_wght.woff2"],
-            variationSettings: "normal",
-            display: "swap",
-          },
-          {
-            weight: "200 800",
-            style: "italic",
-            src: ["./src/assets/fonts/AtkinsonHyperlegibleNext-Italic-VariableFont_wght.woff2"],
-            variationSettings: "normal",
-            display: "swap",
-          },
-        ],
-      },
-    ],
+    // csp: cspConfig,
+    // fonts: [
+    //   {
+    //     provider: "local",
+    //     name: "Atkinson Hyperlegible Next",
+    //     cssVariable: "--font-atkinson-hyperlegible-next",
+    //     variants: [
+    //       {
+    //         weight: "200 800",
+    //         style: "normal",
+    //         src: ["./src/assets/fonts/AtkinsonHyperlegibleNext-VariableFont_wght.woff2"],
+    //         variationSettings: "normal",
+    //         display: "swap",
+    //       },
+    //       {
+    //         weight: "200 800",
+    //         style: "italic",
+    //         src: ["./src/assets/fonts/AtkinsonHyperlegibleNext-Italic-VariableFont_wght.woff2"],
+    //         variationSettings: "normal",
+    //         display: "swap",
+    //       },
+    //     ],
+    //   },
+    // ],
   },
   redirects: {
     /**
