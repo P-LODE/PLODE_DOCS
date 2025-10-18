@@ -48,7 +48,8 @@
     "starlight-llms-txt": "^0.6.0",
     "starlight-openapi": "^0.21.1",
     "tailwindcss": "3.4.5",
-    "turbo": "^2.5.8"
+    "turbo": "^2.5.8",
+    "vite": "^6.2.6"
   },
   "pnpm": {
     "overrides": {
