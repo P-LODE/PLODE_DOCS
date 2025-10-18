@@ -1,0 +1,75 @@
+---
+title: Hugging Face
+description: 오픈소스 AI 모델 허브
+---
+
+Hugging Face는 사전 학습된 AI 모델을 공유하고 사용할 수 있는 플랫폼입니다.
+
+## 주요 기능
+
+- **Transformers**: NLP 모델 라이브러리
+- **Datasets**: 대규모 데이터셋 라이브러리
+- **Hub**: 모델 공유 플랫폼
+- **Spaces**: 데모 호스팅
+- **AutoTrain**: 자동 모델 학습
+
+## 설치하기
+
+```bash
+pip install transformers datasets
+```
+
+## 텍스트 생성
+
+```python
+from transformers import pipeline
+
+# 텍스트 생성 파이프라인
+generator = pipeline('text-generation', model='gpt2')
+
+result = generator(
+    "인공지능의 미래는",
+    max_length=100,
+    num_return_sequences=1
+)
+
+print(result[0]['generated_text'])
+```
+
+## 감정 분석
+
+```python
+classifier = pipeline('sentiment-analysis')
+
+result = classifier("이 제품 정말 마음에 들어요!")
+print(result)  # [{'label': 'POSITIVE', 'score': 0.9998}]
+```
+
+## 한국어 모델
+
+```python
+# KoBERT를 사용한 감정 분석
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
+
+tokenizer = AutoTokenizer.from_pretrained("beomi/kcbert-base")
+model = AutoModelForSequenceClassification.from_pretrained("beomi/kcbert-base")
+
+text = "이 영화 정말 재미있어요!"
+inputs = tokenizer(text, return_tensors="pt")
+outputs = model(**inputs)
+```
+
+## 언제 사용하나요?
+
+- NLP 태스크
+- 이미지 분류
+- 음성 인식
+- 모델 파인튜닝
+- 빠른 프로토타입
+
+## 추가 자료
+
+- [공식 문서](https://huggingface.co/docs)
+- [모델 허브](https://huggingface.co/models)
+

@@ -1,0 +1,61 @@
+---
+title: Pinecone
+description: 벡터 데이터베이스
+---
+
+Pinecone은 머신러닝 애플리케이션을 위한 벡터 데이터베이스입니다.
+
+## 주요 특징
+
+- **빠른 검색**: 밀리초 단위 응답
+- **스케일링**: 수십억 개 벡터 지원
+- **관리형 서비스**: 인프라 관리 불필요
+- **메타데이터 필터링**: 복잡한 쿼리
+- **하이브리드 검색**: 벡터 + 키워드
+
+## 설치하기
+
+```bash
+pip install pinecone-client
+```
+
+## 기본 사용법
+
+```python
+from pinecone import Pinecone
+
+# 초기화
+pc = Pinecone(api_key="your-api-key")
+
+# 인덱스 생성
+index = pc.create_index(
+    name="my-index",
+    dimension=1536,
+    metric="cosine"
+)
+
+# 벡터 업서트
+index.upsert(vectors=[
+    ("id1", [0.1, 0.2, ...], {"text": "첫 번째 문서"}),
+    ("id2", [0.3, 0.4, ...], {"text": "두 번째 문서"})
+])
+
+# 검색
+results = index.query(
+    vector=[0.1, 0.2, ...],
+    top_k=5,
+    include_metadata=True
+)
+```
+
+## 언제 사용하나요?
+
+- 시맨틱 검색
+- 추천 시스템
+- RAG 애플리케이션
+- 유사도 검색
+
+## 추가 자료
+
+- [공식 문서](https://docs.pinecone.io)
+

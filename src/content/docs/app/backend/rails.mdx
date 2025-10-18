@@ -1,0 +1,243 @@
+---
+title: Ruby on Rails
+description: Ruby로 작성된 서버 사이드 웹 애플리케이션 프레임워크
+---
+
+Ruby on Rails는 Convention over Configuration 원칙을 따르는 웹 애플리케이션 프레임워크입니다.
+
+## 주요 특징
+
+- **Convention over Configuration**: 설정보다 규약
+- **DRY 원칙**: Don't Repeat Yourself
+- **Active Record**: 강력한 ORM 패턴
+- **RESTful 디자인**: REST 원칙을 기본으로 채택
+- **빠른 개발**: 높은 생산성
+
+## 설치하기
+
+```bash
+gem install rails
+rails new myapp
+cd myapp
+rails server
+```
+
+## 라우팅
+
+```ruby
+# config/routes.rb
+Rails.application.routes.draw do
+  root 'home#index'
+  
+  resources :users
+  
+  # API 전용
+  namespace :api do
+    namespace :v1 do
+      resources :users, only: [:index, :show, :create, :update, :destroy]
+    end
+  end
+end
+```
+
+## 컨트롤러
+
+```ruby
+# app/controllers/users_controller.rb
+class UsersController < ApplicationController
+  before_action :set_user, only: [:show, :update, :destroy]
+  
+  def index
+    @users = User.all
+    render json: @users
+  end
+  
+  def show
+    render json: @user
+  end
+  
+  def create
+    @user = User.new(user_params)
+    
+    if @user.save
+      render json: @user, status: :created
+    else
+      render json: @user.errors, status: :unprocessable_entity
+    end
+  end
+  
+  def update
+    if @user.update(user_params)
+      render json: @user
+    else
+      render json: @user.errors, status: :unprocessable_entity
+    end
+  end
+  
+  def destroy
+    @user.destroy
+    head :no_content
+  end
+  
+  private
+  
+  def set_user
+    @user = User.find(params[:id])
+  end
+  
+  def user_params
+    params.require(:user).permit(:name, :email, :password)
+  end
+end
+```
+
+## 모델
+
+```ruby
+# app/models/user.rb
+class User < ApplicationRecord
+  has_secure_password
+  
+  has_many :posts, dependent: :destroy
+  has_many :comments
+  
+  validates :name, presence: true
+  validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :password, length: { minimum: 8 }, if: :password_required?
+  
+  before_save :downcase_email
+  
+  scope :active, -> { where(active: true) }
+  scope :recent, -> { order(created_at: :desc) }
+  
+  def full_name
+    "#{first_name} #{last_name}"
+  end
+  
+  private
+  
+  def downcase_email
+    self.email = email.downcase
+  end
+  
+  def password_required?
+    password_digest.nil? || password.present?
+  end
+end
+```
+
+## 마이그레이션
+
+```ruby
+# db/migrate/20240101000000_create_users.rb
+class CreateUsers < ActiveRecord::Migration[7.0]
+  def change
+    create_table :users do |t|
+      t.string :name, null: false
+      t.string :email, null: false
+      t.string :password_digest
+      t.boolean :active, default: true
+      
+      t.timestamps
+    end
+    
+    add_index :users, :email, unique: true
+  end
+end
+
+# 실행
+rails db:migrate
+```
+
+## Active Record 쿼리
+
+```ruby
+# 조회
+User.all
+User.find(1)
+User.find_by(email: 'user@example.com')
+User.where(active: true)
+User.where('created_at > ?', 1.week.ago)
+
+# 생성
+user = User.create(name: 'John', email: 'john@example.com')
+user = User.new(name: 'John')
+user.save
+
+# 수정
+user.update(name: 'Jane')
+user.update_attribute(:name, 'Jane')
+
+# 삭제
+user.destroy
+User.destroy_all
+
+# 관계
+user.posts
+user.posts.create(title: 'Hello', body: 'World')
+```
+
+## 시리얼라이저
+
+```ruby
+# app/serializers/user_serializer.rb
+class UserSerializer < ActiveModel::Serializer
+  attributes :id, :name, :email, :created_at
+  
+  has_many :posts
+  
+  def email
+    object.email if current_user&.admin?
+  end
+end
+```
+
+## 백그라운드 작업
+
+```ruby
+# app/jobs/send_email_job.rb
+class SendEmailJob < ApplicationJob
+  queue_as :default
+  
+  def perform(user_id)
+    user = User.find(user_id)
+    UserMailer.welcome_email(user).deliver_now
+  end
+end
+
+# 사용
+SendEmailJob.perform_later(user.id)
+```
+
+## 테스트
+
+```ruby
+# test/models/user_test.rb
+require 'test_helper'
+
+class UserTest < ActiveSupport::TestCase
+  test "should not save user without email" do
+    user = User.new(name: 'John')
+    assert_not user.save, "Saved the user without an email"
+  end
+  
+  test "should save valid user" do
+    user = User.new(name: 'John', email: 'john@example.com', password: 'password123')
+    assert user.save, "Failed to save valid user"
+  end
+end
+```
+
+## 언제 사용하나요?
+
+- 빠른 프로토타입 개발
+- 스타트업 MVP 개발
+- 콘텐츠 관리 시스템
+- 전자상거래 플랫폼
+- RESTful API 서버
+
+## 추가 자료
+
+- [공식 문서](https://rubyonrails.org)
+- [Rails Guides](https://guides.rubyonrails.org)
+

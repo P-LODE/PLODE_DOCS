@@ -1,0 +1,241 @@
+---
+title: Laravel
+description: PHP를 위한 우아한 웹 애플리케이션 프레임워크
+---
+
+Laravel은 웹 장인을 위한 PHP 프레임워크로, 우아한 문법과 강력한 기능을 제공합니다.
+
+## 주요 특징
+
+- **Eloquent ORM**: 아름다운 ActiveRecord 구현
+- **Blade 템플릿**: 강력하고 직관적인 템플릿 엔진
+- **Artisan CLI**: 강력한 커맨드라인 도구
+- **미들웨어**: 요청 필터링 시스템
+- **큐와 스케줄링**: 백그라운드 작업 처리
+
+## 설치하기
+
+```bash
+composer create-project laravel/laravel my-project
+cd my-project
+php artisan serve
+```
+
+## 라우팅
+
+```php
+// routes/web.php
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/users', [UserController::class, 'index']);
+Route::post('/users', [UserController::class, 'store']);
+Route::get('/users/{id}', [UserController::class, 'show']);
+Route::put('/users/{id}', [UserController::class, 'update']);
+Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+// API 라우트
+Route::apiResource('users', UserController::class);
+```
+
+## 컨트롤러
+
+```php
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+
+class UserController extends Controller
+{
+    public function index()
+    {
+        $users = User::all();
+        return response()->json($users);
+    }
+    
+    public function show($id)
+    {
+        $user = User::findOrFail($id);
+        return response()->json($user);
+    }
+    
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:8',
+        ]);
+        
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => bcrypt($validated['password']),
+        ]);
+        
+        return response()->json($user, 201);
+    }
+    
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        
+        $validated = $request->validate([
+            'name' => 'string|max:255',
+            'email' => 'email|unique:users,email,' . $id,
+        ]);
+        
+        $user->update($validated);
+        return response()->json($user);
+    }
+    
+    public function destroy($id)
+    {
+        User::destroy($id);
+        return response()->json(null, 204);
+    }
+}
+```
+
+## Eloquent 모델
+
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class User extends Model
+{
+    protected $fillable = ['name', 'email', 'password'];
+    
+    protected $hidden = ['password'];
+    
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+    
+    // 관계 정의
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+    
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+}
+```
+
+## 마이그레이션
+
+```php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
+            $table->timestamps();
+        });
+    }
+    
+    public function down()
+    {
+        Schema::dropIfExists('users');
+    }
+};
+```
+
+## 미들웨어
+
+```php
+namespace App\Http\Middleware;
+
+use Closure;
+
+class CheckAge
+{
+    public function handle($request, Closure $next)
+    {
+        if ($request->age <= 18) {
+            return redirect('home');
+        }
+        
+        return $next($request);
+    }
+}
+
+// 사용
+Route::get('profile', function () {
+    //
+})->middleware('check.age');
+```
+
+## Blade 템플릿
+
+```php
+<!-- resources/views/users/index.blade.php -->
+@extends('layouts.app')
+
+@section('content')
+    <h1>사용자 목록</h1>
+    
+    @if(count($users) > 0)
+        <ul>
+            @foreach($users as $user)
+                <li>{{ $user->name }} - {{ $user->email }}</li>
+            @endforeach
+        </ul>
+    @else
+        <p>사용자가 없습니다.</p>
+    @endif
+@endsection
+```
+
+## Artisan 명령어
+
+```bash
+# 모델과 마이그레이션 생성
+php artisan make:model User -m
+
+# 컨트롤러 생성
+php artisan make:controller UserController --resource
+
+# 마이그레이션 실행
+php artisan migrate
+
+# 시더 실행
+php artisan db:seed
+
+# 큐 워커 실행
+php artisan queue:work
+
+# 캐시 클리어
+php artisan cache:clear
+```
+
+## 언제 사용하나요?
+
+- 콘텐츠 관리 시스템
+- 전자상거래 플랫폼
+- SaaS 애플리케이션
+- RESTful API 개발
+- 빠른 프로토타입 개발
+
+## 추가 자료
+
+- [공식 문서](https://laravel.com/docs)
+- [Laracasts](https://laracasts.com)
+

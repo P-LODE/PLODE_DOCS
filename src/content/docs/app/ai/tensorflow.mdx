@@ -1,0 +1,121 @@
+---
+title: TensorFlow
+description: 구글이 개발한 머신러닝 프레임워크
+---
+
+TensorFlow는 구글이 개발한 오픈소스 머신러닝 프레임워크로 딥러닝 모델을 쉽게 구축하고 배포할 수 있습니다.
+
+## 주요 특징
+
+- **Keras API**: 고수준 API로 빠른 개발
+- **분산 학습**: 여러 GPU/TPU에서 학습
+- **TensorFlow Lite**: 모바일/IoT 배포
+- **TensorFlow.js**: 브라우저에서 실행
+- **프로덕션 준비**: TensorFlow Serving
+
+## 설치하기
+
+```bash
+# CPU 버전
+pip install tensorflow
+
+# GPU 버전
+pip install tensorflow[and-cuda]
+
+# 버전 확인
+python -c "import tensorflow as tf; print(tf.__version__)"
+```
+
+## 기본 예제
+
+```python
+import tensorflow as tf
+import numpy as np
+
+# 간단한 선형 회귀
+X = np.array([1, 2, 3, 4, 5], dtype=float)
+y = np.array([2, 4, 6, 8, 10], dtype=float)
+
+# 모델 정의
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(1, input_shape=[1])
+])
+
+# 컴파일
+model.compile(optimizer='sgd', loss='mean_squared_error')
+
+# 학습
+model.fit(X, y, epochs=500, verbose=0)
+
+# 예측
+print(model.predict([6.0]))  # 약 12가 출력됨
+```
+
+## 신경망 모델
+
+```python
+# MNIST 손글씨 분류
+mnist = tf.keras.datasets.mnist
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+# 정규화
+x_train, x_test = x_train / 255.0, x_test / 255.0
+
+# 모델 구축
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape=(28, 28)),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dropout(0.2),
+    tf.keras.layers.Dense(10, activation='softmax')
+])
+
+# 컴파일
+model.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# 학습
+model.fit(x_train, y_train, epochs=5, validation_split=0.2)
+
+# 평가
+test_loss, test_acc = model.evaluate(x_test, y_test)
+print(f'Test accuracy: {test_acc}')
+```
+
+## CNN (Convolutional Neural Network)
+
+```python
+# 이미지 분류 모델
+model = tf.keras.Sequential([
+    tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
+    tf.keras.layers.MaxPooling2D((2, 2)),
+    tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+    tf.keras.layers.MaxPooling2D((2, 2)),
+    tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dense(10, activation='softmax')
+])
+
+model.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+```
+
+## 언제 사용하나요?
+
+- 딥러닝 모델 개발
+- 컴퓨터 비전
+- 자연어 처리
+- 음성 인식
+- 프로덕션 배포
+
+## 추가 자료
+
+- [공식 문서](https://www.tensorflow.org)
+- [TensorFlow Hub](https://www.tensorflow.org/hub)
+

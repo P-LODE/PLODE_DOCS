@@ -1,0 +1,107 @@
+---
+title: PyTorch
+description: Facebook이 개발한 딥러닝 프레임워크
+---
+
+PyTorch는 연구와 프로덕션 환경 모두에 적합한 딥러닝 프레임워크입니다.
+
+## 주요 특징
+
+- **동적 계산 그래프**: 유연한 모델 구성
+- **직관적인 API**: Python스러운 코드
+- **강력한 GPU 지원**: CUDA 통합
+- **자동 미분**: Autograd 시스템
+- **활발한 커뮤니티**: 연구에 많이 사용
+
+## 설치하기
+
+```bash
+# CPU 버전
+pip install torch torchvision torchaudio
+
+# CUDA 버전 (예: CUDA 11.8)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+```
+
+## 기본 텐서 연산
+
+```python
+import torch
+
+# 텐서 생성
+x = torch.tensor([[1, 2], [3, 4]])
+y = torch.rand(2, 2)
+
+# 연산
+z = x + y
+print(z)
+
+# GPU로 이동
+if torch.cuda.is_available():
+    x = x.cuda()
+    y = y.cuda()
+```
+
+## 신경망 구축
+
+```python
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+# 모델 정의
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.fc1 = nn.Linear(784, 128)
+        self.fc2 = nn.Linear(128, 64)
+        self.fc3 = nn.Linear(64, 10)
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(0.2)
+    
+    def forward(self, x):
+        x = x.view(-1, 784)
+        x = self.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = self.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+
+model = Net()
+```
+
+## 훈련 루프
+
+```python
+# 손실 함수와 옵티마이저
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+# 훈련
+for epoch in range(10):
+    for data, target in train_loader:
+        # Forward pass
+        output = model(data)
+        loss = criterion(output, target)
+        
+        # Backward pass
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+    
+    print(f'Epoch {epoch+1}, Loss: {loss.item():.4f}')
+```
+
+## 언제 사용하나요?
+
+- 딥러닝 연구
+- 컴퓨터 비전
+- NLP 모델
+- 강화학습
+- 프로토타입 개발
+
+## 추가 자료
+
+- [공식 문서](https://pytorch.org/docs/)
+- [PyTorch Tutorials](https://pytorch.org/tutorials/)
+

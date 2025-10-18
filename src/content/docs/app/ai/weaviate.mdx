@@ -1,0 +1,63 @@
+---
+title: Weaviate
+description: 오픈소스 벡터 데이터베이스
+---
+
+Weaviate는 벡터 검색 엔진과 객체 지향 데이터베이스를 결합한 오픈소스 플랫폼입니다.
+
+## 주요 특징
+
+- **오픈소스**: 자체 호스팅 가능
+- **GraphQL API**: 강력한 쿼리 언어
+- **모듈식**: 다양한 벡터라이저 지원
+- **하이브리드 검색**: 벡터 + BM25
+- **필터링**: 복잡한 쿼리 지원
+
+## 설치하기
+
+```bash
+pip install weaviate-client
+```
+
+## 기본 사용법
+
+```python
+import weaviate
+
+# 클라이언트 생성
+client = weaviate.Client("http://localhost:8080")
+
+# 스키마 생성
+schema = {
+    "class": "Article",
+    "properties": [
+        {"name": "title", "dataType": ["text"]},
+        {"name": "content", "dataType": ["text"]}
+    ]
+}
+client.schema.create_class(schema)
+
+# 객체 추가
+client.data_object.create({
+    "title": "첫 번째 기사",
+    "content": "내용..."
+}, "Article")
+
+# 검색
+result = client.query.get("Article", ["title", "content"]) \
+    .with_near_text({"concepts": ["AI"]}) \
+    .with_limit(5) \
+    .do()
+```
+
+## 언제 사용하나요?
+
+- 시맨틱 검색
+- 지식 그래프
+- RAG 시스템
+- 추천 엔진
+
+## 추가 자료
+
+- [공식 문서](https://weaviate.io/developers/weaviate)
+

@@ -1,0 +1,283 @@
+---
+title: Kubernetes
+description: 컨테이너 오케스트레이션 플랫폼
+---
+
+Kubernetes는 컨테이너화된 애플리케이션의 배포, 스케일링, 관리를 자동화하는 오픈소스 플랫폼입니다.
+
+## 주요 특징
+
+- **자동 스케일링**: 부하에 따른 자동 확장/축소
+- **자동 복구**: 실패한 컨테이너 자동 재시작
+- **로드 밸런싱**: 트래픽 분산
+- **롤링 업데이트**: 무중단 배포
+- **선언적 구성**: YAML을 통한 인프라 정의
+
+## 설치하기
+
+```bash
+# minikube (로컬 개발)
+brew install minikube
+minikube start
+
+# kubectl
+brew install kubectl
+
+# 버전 확인
+kubectl version --client
+```
+
+## 기본 개념
+
+- **Pod**: 가장 작은 배포 단위, 하나 이상의 컨테이너
+- **Service**: Pod에 대한 네트워크 접근
+- **Deployment**: Pod의 배포와 업데이트 관리
+- **Namespace**: 리소스 격리
+- **ConfigMap/Secret**: 설정 및 비밀 정보 관리
+
+## Pod 생성
+
+```yaml
+# pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+```
+
+```bash
+kubectl apply -f pod.yaml
+kubectl get pods
+kubectl describe pod nginx-pod
+kubectl logs nginx-pod
+kubectl delete pod nginx-pod
+```
+
+## Deployment
+
+```yaml
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:1.0
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+```
+
+```bash
+kubectl apply -f deployment.yaml
+kubectl get deployments
+kubectl get pods
+kubectl scale deployment myapp-deployment --replicas=5
+kubectl rollout status deployment myapp-deployment
+```
+
+## Service
+
+```yaml
+# service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  selector:
+    app: myapp
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+  type: LoadBalancer
+```
+
+```bash
+kubectl apply -f service.yaml
+kubectl get services
+minikube service myapp-service
+```
+
+## ConfigMap과 Secret
+
+```yaml
+# configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  database_url: "postgresql://localhost:5432"
+  api_endpoint: "https://api.example.com"
+```
+
+```yaml
+# secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+type: Opaque
+data:
+  db_password: cGFzc3dvcmQxMjM=  # base64 인코딩
+  api_key: YXBpa2V5MTIz
+```
+
+```yaml
+# Deployment에서 사용
+spec:
+  containers:
+  - name: myapp
+    image: myapp:1.0
+    envFrom:
+    - configMapRef:
+        name: app-config
+    env:
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: app-secret
+          key: db_password
+```
+
+## Ingress
+
+```yaml
+# ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myapp-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: myapp.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: myapp-service
+            port:
+              number: 80
+```
+
+## Persistent Volume
+
+```yaml
+# pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/pv
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+```
+
+## Helm (패키지 매니저)
+
+```bash
+# Helm 설치
+brew install helm
+
+# 차트 설치
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm install my-nginx bitnami/nginx
+
+# 설치된 차트 확인
+helm list
+
+# 차트 삭제
+helm uninstall my-nginx
+```
+
+## 유용한 명령어
+
+```bash
+# 클러스터 정보
+kubectl cluster-info
+
+# 노드 확인
+kubectl get nodes
+
+# 모든 리소스 확인
+kubectl get all
+
+# 특정 네임스페이스
+kubectl get pods -n kube-system
+
+# 로그 스트리밍
+kubectl logs -f pod-name
+
+# Pod 내부 접속
+kubectl exec -it pod-name -- /bin/bash
+
+# 포트 포워딩
+kubectl port-forward pod/pod-name 8080:80
+
+# 리소스 사용량
+kubectl top nodes
+kubectl top pods
+```
+
+## 언제 사용하나요?
+
+- 마이크로서비스 아키텍처
+- 클라우드 네이티브 애플리케이션
+- 고가용성이 필요한 서비스
+- 자동 스케일링이 필요한 애플리케이션
+- 멀티 클라우드 환경
+
+## 추가 자료
+
+- [공식 문서](https://kubernetes.io/docs/)
+- [Kubernetes Patterns](https://k8spatterns.io)

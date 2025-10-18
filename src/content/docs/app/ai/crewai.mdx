@@ -1,0 +1,78 @@
+---
+title: CrewAI
+description: AI 에이전트 협업 프레임워크
+---
+
+CrewAI는 역할 기반 AI 에이전트가 팀으로 협력하여 작업을 수행하는 프레임워크입니다.
+
+## 주요 특징
+
+- **역할 기반**: 각 에이전트에 특정 역할 부여
+- **작업 위임**: 에이전트 간 작업 위임
+- **유연한 프로세스**: 순차적 또는 계층적 실행
+- **도구 통합**: 다양한 도구 사용
+- **메모리**: 작업 컨텍스트 유지
+
+## 설치하기
+
+```bash
+pip install crewai
+```
+
+## 기본 사용법
+
+```python
+from crewai import Agent, Task, Crew
+from langchain_openai import ChatOpenAI
+
+# LLM 설정
+llm = ChatOpenAI(model="gpt-4")
+
+# 에이전트 정의
+researcher = Agent(
+    role='Researcher',
+    goal='AI 트렌드를 조사합니다',
+    backstory='당신은 AI 전문 연구원입니다',
+    llm=llm
+)
+
+writer = Agent(
+    role='Writer',
+    goal='조사 내용을 바탕으로 기사를 작성합니다',
+    backstory='당신은 기술 전문 작가입니다',
+    llm=llm
+)
+
+# 작업 정의
+research_task = Task(
+    description='최신 AI 트렌드를 조사하세요',
+    agent=researcher
+)
+
+write_task = Task(
+    description='조사 내용을 바탕으로 블로그 포스트를 작성하세요',
+    agent=writer
+)
+
+# 크루 생성 및 실행
+crew = Crew(
+    agents=[researcher, writer],
+    tasks=[research_task, write_task],
+    verbose=True
+)
+
+result = crew.kickoff()
+print(result)
+```
+
+## 언제 사용하나요?
+
+- 콘텐츠 생성
+- 리서치 자동화
+- 복잡한 워크플로우
+- 팀 기반 문제 해결
+
+## 추가 자료
+
+- [공식 문서](https://docs.crewai.com)
+

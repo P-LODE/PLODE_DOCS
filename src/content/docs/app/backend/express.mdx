@@ -1,0 +1,132 @@
+---
+title: Express
+description: Node.js를 위한 빠르고 간결한 웹 프레임워크
+---
+
+Express는 Node.js를 위한 빠르고 간결한 웹 프레임워크입니다.
+
+## 주요 특징
+
+- **미들웨어 시스템**: 요청 처리 파이프라인을 쉽게 구성
+- **라우팅**: 강력하고 유연한 라우팅 시스템
+- **템플릿 엔진**: 다양한 템플릿 엔진 지원
+- **확장성**: 플러그인과 미들웨어로 기능 확장
+- **간결함**: 최소한의 보일러플레이트 코드
+
+## 설치하기
+
+```bash
+npm install express
+```
+
+## 기본 예제
+
+```javascript
+const express = require('express');
+const app = express();
+
+// 미들웨어
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 라우트
+app.get('/', (req, res) => {
+  res.json({ message: 'Express 서버입니다!' });
+});
+
+app.post('/users', (req, res) => {
+  const user = req.body;
+  res.status(201).json({ id: 1, ...user });
+});
+
+app.listen(3000, () => {
+  console.log('서버가 3000번 포트에서 실행 중입니다');
+});
+```
+
+## RESTful API 예제
+
+```javascript
+const express = require('express');
+const router = express.Router();
+
+// 사용자 목록 조회
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.findAll();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 사용자 생성
+router.post('/users', async (req, res) => {
+  try {
+    const user = await User.create(req.body);
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// 사용자 조회
+router.get('/users/:id', async (req, res) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: '사용자를 찾을 수 없습니다' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+module.exports = router;
+```
+
+## 미들웨어 예제
+
+```javascript
+// 로깅 미들웨어
+const logger = (req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+};
+
+// 인증 미들웨어
+const authenticate = (req, res, next) => {
+  const token = req.headers.authorization;
+  
+  if (!token) {
+    return res.status(401).json({ error: '인증이 필요합니다' });
+  }
+  
+  // 토큰 검증 로직
+  next();
+};
+
+// 에러 핸들링 미들웨어
+const errorHandler = (err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: '서버 오류가 발생했습니다' });
+};
+
+app.use(logger);
+app.use('/api', authenticate);
+app.use(errorHandler);
+```
+
+## 언제 사용하나요?
+
+- 빠르게 RESTful API를 구축할 때
+- 간단한 웹 애플리케이션 개발
+- 마이크로서비스 구축
+- 프로토타입 개발
+
+## 추가 자료
+
+- [공식 문서](https://expressjs.com)
+- [Express 가이드](https://expressjs.com/en/guide/routing.html)
+

@@ -1,0 +1,63 @@
+---
+title: AutoGen
+description: Microsoft의 멀티 에이전트 프레임워크
+---
+
+AutoGen은 여러 AI 에이전트가 협력하여 복잡한 작업을 수행하는 프레임워크입니다.
+
+## 주요 특징
+
+- **멀티 에이전트**: 여러 에이전트 협업
+- **대화형**: 에이전트 간 자연스러운 대화
+- **코드 실행**: 안전한 코드 실행 환경
+- **사람 개입**: 필요시 사람이 참여
+- **유연성**: 다양한 LLM 지원
+
+## 설치하기
+
+```bash
+pip install pyautogen
+```
+
+## 기본 사용법
+
+```python
+import autogen
+
+# LLM 설정
+config_list = [{
+    "model": "gpt-4",
+    "api_key": "your-key"
+}]
+
+# 어시스턴트 에이전트
+assistant = autogen.AssistantAgent(
+    name="assistant",
+    llm_config={"config_list": config_list}
+)
+
+# 사용자 프록시
+user_proxy = autogen.UserProxyAgent(
+    name="user_proxy",
+    human_input_mode="NEVER",
+    code_execution_config={"work_dir": "coding"}
+)
+
+# 대화 시작
+user_proxy.initiate_chat(
+    assistant,
+    message="피보나치 수열을 계산하는 Python 함수를 작성해주세요."
+)
+```
+
+## 언제 사용하나요?
+
+- 복잡한 문제 해결
+- 코드 생성 및 실행
+- 멀티 에이전트 시스템
+- 자동화 워크플로우
+
+## 추가 자료
+
+- [공식 문서](https://microsoft.github.io/autogen/)
+

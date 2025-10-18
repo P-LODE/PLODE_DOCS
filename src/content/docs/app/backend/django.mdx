@@ -1,0 +1,145 @@
+---
+title: Django
+description: Python 기반의 고수준 웹 프레임워크
+---
+
+Django는 빠른 개발과 깔끔하고 실용적인 디자인을 장려하는 Python 웹 프레임워크입니다.
+
+## 주요 특징
+
+- **배터리 포함**: ORM, 인증, 관리자 페이지 등 기본 제공
+- **보안**: SQL 인젝션, XSS 등 보안 기능 내장
+- **ORM**: 강력한 데이터베이스 추상화 계층
+- **Admin 인터페이스**: 자동 생성되는 관리자 페이지
+- **확장성**: 대규모 애플리케이션에 적합
+
+## 설치하기
+
+```bash
+pip install django
+django-admin startproject myproject
+cd myproject
+python manage.py runserver
+```
+
+## 기본 모델
+
+```python
+from django.db import models
+
+class User(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'users'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.name
+```
+
+## 뷰 (Views)
+
+```python
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from .models import User
+
+def user_list(request):
+    users = User.objects.all()
+    return JsonResponse({
+        'users': list(users.values())
+    })
+
+def user_detail(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    return JsonResponse({
+        'id': user.id,
+        'name': user.name,
+        'email': user.email,
+    })
+```
+
+## URL 라우팅
+
+```python
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('users/', views.user_list, name='user-list'),
+    path('users/<int:pk>/', views.user_detail, name='user-detail'),
+]
+```
+
+## Django REST Framework
+
+```python
+from rest_framework import viewsets, serializers
+from .models import User
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'created_at']
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+```
+
+## 폼 (Forms)
+
+```python
+from django import forms
+from .models import User
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['name', 'email']
+        
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('이미 사용 중인 이메일입니다')
+        return email
+```
+
+## 인증
+
+```python
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
+
+@login_required
+def protected_view(request):
+    return render(request, 'protected.html')
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+    return render(request, 'login.html')
+```
+
+## 언제 사용하나요?
+
+- 콘텐츠 관리 시스템 (CMS)
+- 전자상거래 플랫폼
+- 데이터 기반 웹 애플리케이션
+- RESTful API 서버
+- 소셜 네트워크 플랫폼
+
+## 추가 자료
+
+- [공식 문서](https://www.djangoproject.com)
+- [Django REST Framework](https://www.django-rest-framework.org)
+

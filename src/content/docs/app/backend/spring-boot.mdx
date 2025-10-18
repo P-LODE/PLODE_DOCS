@@ -1,0 +1,230 @@
+---
+title: Spring Boot
+description: Java 기반의 강력한 애플리케이션 프레임워크
+---
+
+Spring Boot는 독립 실행형 프로덕션 급 Spring 기반 애플리케이션을 쉽게 만들 수 있게 해주는 프레임워크입니다.
+
+## 주요 특징
+
+- **자동 설정**: 최소한의 설정으로 빠른 시작
+- **내장 서버**: Tomcat, Jetty 등 내장
+- **프로덕션 준비**: 모니터링, 헬스 체크 기능 내장
+- **의존성 관리**: 스타터를 통한 간편한 의존성 관리
+- **마이크로서비스**: 클라우드 네이티브 애플리케이션에 적합
+
+## 프로젝트 생성
+
+[Spring Initializr](https://start.spring.io)에서 생성하거나:
+
+```bash
+curl https://start.spring.io/starter.zip \
+  -d dependencies=web,data-jpa,h2 \
+  -d name=myproject \
+  -o myproject.zip
+unzip myproject.zip
+cd myproject
+./mvnw spring-boot:run
+```
+
+## 기본 REST 컨트롤러
+
+```java
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+    
+    @Autowired
+    private UserService userService;
+    
+    @GetMapping
+    public List<User> getAllUsers() {
+        return userService.findAll();
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        return userService.findById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @PostMapping
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
+        User created = userService.save(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(
+        @PathVariable Long id,
+        @Valid @RequestBody User user
+    ) {
+        return userService.update(id, user)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+```
+
+## 엔티티 정의
+
+```java
+@Entity
+@Table(name = "users")
+public class User {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(nullable = false)
+    @NotBlank(message = "이름은 필수입니다")
+    private String name;
+    
+    @Column(unique = true, nullable = false)
+    @Email(message = "유효한 이메일을 입력하세요")
+    private String email;
+    
+    @CreatedDate
+    private LocalDateTime createdAt;
+    
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+    
+    // Getters and Setters
+}
+```
+
+## Repository
+
+```java
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
+    
+    List<User> findByNameContaining(String name);
+    
+    @Query("SELECT u FROM User u WHERE u.createdAt > :date")
+    List<User> findRecentUsers(@Param("date") LocalDateTime date);
+}
+```
+
+## Service Layer
+
+```java
+@Service
+@Transactional
+public class UserService {
+    
+    @Autowired
+    private UserRepository userRepository;
+    
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+    
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
+    
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+    
+    public Optional<User> update(Long id, User userDetails) {
+        return userRepository.findById(id)
+            .map(user -> {
+                user.setName(userDetails.getName());
+                user.setEmail(userDetails.getEmail());
+                return userRepository.save(user);
+            });
+    }
+    
+    public void delete(Long id) {
+        userRepository.deleteById(id);
+    }
+}
+```
+
+## 설정 파일 (application.yml)
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydb
+    username: user
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  
+server:
+  port: 8080
+
+logging:
+  level:
+    org.springframework: INFO
+    com.example: DEBUG
+```
+
+## 예외 처리
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(
+        ResourceNotFoundException ex
+    ) {
+        ErrorResponse error = new ErrorResponse(
+            HttpStatus.NOT_FOUND.value(),
+            ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+    
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(
+        MethodArgumentNotValidException ex
+    ) {
+        List<String> errors = ex.getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(FieldError::getDefaultMessage)
+            .collect(Collectors.toList());
+        
+        ErrorResponse error = new ErrorResponse(
+            HttpStatus.BAD_REQUEST.value(),
+            "유효성 검사 실패",
+            errors
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+}
+```
+
+## 언제 사용하나요?
+
+- 대규모 엔터프라이즈 애플리케이션
+- 마이크로서비스 아키텍처
+- 금융, 은행 시스템
+- 복잡한 비즈니스 로직이 필요한 프로젝트
+- 높은 안정성과 보안이 요구되는 시스템
+
+## 추가 자료
+
+- [공식 문서](https://spring.io/projects/spring-boot)
+- [Spring Guides](https://spring.io/guides)
+

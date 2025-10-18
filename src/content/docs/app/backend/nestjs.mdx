@@ -1,0 +1,149 @@
+---
+title: NestJS
+description: 효율적이고 확장 가능한 Node.js 서버 애플리케이션을 구축하기 위한 프레임워크
+---
+
+NestJS는 효율적이고 확장 가능한 Node.js 서버 애플리케이션을 구축하기 위한 프레임워크입니다.
+
+## 주요 특징
+
+- **TypeScript 기반**: 강력한 타입 시스템
+- **모듈식 아키텍처**: 잘 구조화된 코드 조직
+- **의존성 주입**: 테스트와 유지보수가 용이
+- **데코레이터**: 선언적 프로그래밍 스타일
+- **다양한 플랫폼**: Express와 Fastify 지원
+
+## 설치하기
+
+```bash
+npm i -g @nestjs/cli
+nest new my-project
+cd my-project
+npm run start:dev
+```
+
+## 기본 컨트롤러
+
+```typescript
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(+id);
+  }
+
+  @Post()
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
+}
+```
+
+## 서비스 예제
+
+```typescript
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class UsersService {
+  private users = [];
+
+  findAll() {
+    return this.users;
+  }
+
+  findOne(id: number) {
+    return this.users.find(user => user.id === id);
+  }
+
+  create(createUserDto: CreateUserDto) {
+    const user = {
+      id: Date.now(),
+      ...createUserDto,
+    };
+    this.users.push(user);
+    return user;
+  }
+}
+```
+
+## 모듈 구조
+
+```typescript
+import { Module } from '@nestjs/common';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+
+@Module({
+  controllers: [UsersController],
+  providers: [UsersService],
+  exports: [UsersService],
+})
+export class UsersModule {}
+```
+
+## DTO와 유효성 검사
+
+```typescript
+import { IsEmail, IsString, MinLength } from 'class-validator';
+
+export class CreateUserDto {
+  @IsString()
+  @MinLength(2)
+  name: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(8)
+  password: string;
+}
+```
+
+## 가드 (인증)
+
+```typescript
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const request = context.switchToHttp().getRequest();
+    return validateRequest(request);
+  }
+}
+
+// 사용
+@UseGuards(AuthGuard)
+@Get()
+findAll() {
+  return this.usersService.findAll();
+}
+```
+
+## 언제 사용하나요?
+
+- 대규모 엔터프라이즈 애플리케이션
+- 확장 가능한 마이크로서비스
+- GraphQL API 서버
+- WebSocket 실시간 애플리케이션
+- 구조화된 백엔드가 필요한 프로젝트
+
+## 추가 자료
+
+- [공식 문서](https://nestjs.com)
+- [NestJS 코스](https://courses.nestjs.com)
+

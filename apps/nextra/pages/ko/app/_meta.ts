@@ -1,6 +1,7 @@
 export default {
   front: {
-    title: 'Frontend'
+    title: 'Frontend',
+    type: 'page'
   }
 }
 

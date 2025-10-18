@@ -1,0 +1,380 @@
+---
+title: AWS (Amazon Web Services)
+description: 클라우드 컴퓨팅 플랫폼
+---
+
+AWS는 아마존이 제공하는 클라우드 컴퓨팅 플랫폼으로 200개 이상의 서비스를 제공합니다.
+
+## 주요 서비스
+
+### 컴퓨팅
+- **EC2**: 가상 서버
+- **Lambda**: 서버리스 함수
+- **ECS/EKS**: 컨테이너 오케스트레이션
+- **Elastic Beanstalk**: 애플리케이션 배포
+
+### 스토리지
+- **S3**: 객체 스토리지
+- **EBS**: 블록 스토리지
+- **EFS**: 파일 스토리지
+- **Glacier**: 아카이브 스토리지
+
+### 데이터베이스
+- **RDS**: 관계형 데이터베이스
+- **DynamoDB**: NoSQL 데이터베이스
+- **ElastiCache**: 인메모리 캐시
+- **Aurora**: 고성능 데이터베이스
+
+## AWS CLI 설치
+
+```bash
+# macOS
+brew install awscli
+
+# Linux
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+# 설정
+aws configure
+```
+
+## EC2 인스턴스 생성
+
+```bash
+# 인스턴스 시작
+aws ec2 run-instances \
+  --image-id ami-0c55b159cbfafe1f0 \
+  --instance-type t3.micro \
+  --key-name my-key-pair \
+  --security-group-ids sg-12345678 \
+  --subnet-id subnet-12345678 \
+  --count 1
+
+# 인스턴스 목록
+aws ec2 describe-instances
+
+# 인스턴스 중지
+aws ec2 stop-instances --instance-ids i-1234567890abcdef0
+
+# 인스턴스 종료
+aws ec2 terminate-instances --instance-ids i-1234567890abcdef0
+```
+
+## S3 버킷 관리
+
+```bash
+# 버킷 생성
+aws s3 mb s3://my-bucket
+
+# 파일 업로드
+aws s3 cp file.txt s3://my-bucket/
+
+# 파일 다운로드
+aws s3 cp s3://my-bucket/file.txt ./
+
+# 버킷 동기화
+aws s3 sync ./local-folder s3://my-bucket/
+
+# 버킷 삭제
+aws s3 rb s3://my-bucket --force
+```
+
+## Lambda 함수
+
+```javascript
+// index.js
+exports.handler = async (event) => {
+    console.log('Event:', JSON.stringify(event, null, 2));
+    
+    const response = {
+        statusCode: 200,
+        body: JSON.stringify({
+            message: '안녕하세요, Lambda!',
+            input: event
+        })
+    };
+    
+    return response;
+};
+```
+
+```bash
+# 함수 배포
+zip function.zip index.js
+
+aws lambda create-function \
+  --function-name my-function \
+  --runtime nodejs18.x \
+  --role arn:aws:iam::123456789012:role/lambda-role \
+  --handler index.handler \
+  --zip-file fileb://function.zip
+
+# 함수 호출
+aws lambda invoke \
+  --function-name my-function \
+  --payload '{"key": "value"}' \
+  response.json
+```
+
+## CloudFormation 템플릿
+
+```yaml
+# template.yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Web Application Stack'
+
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t3.micro
+      - t3.small
+      - t3.medium
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: MyVPC
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+
+  WebServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0c55b159cbfafe1f0
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref PublicSubnet
+      SecurityGroupIds:
+        - !Ref WebServerSecurityGroup
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP and SSH
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  WebServerPublicIP:
+    Description: Public IP of the web server
+    Value: !GetAtt WebServer.PublicIp
+```
+
+```bash
+# 스택 생성
+aws cloudformation create-stack \
+  --stack-name my-stack \
+  --template-body file://template.yaml \
+  --parameters ParameterKey=InstanceType,ParameterValue=t3.small
+
+# 스택 업데이트
+aws cloudformation update-stack \
+  --stack-name my-stack \
+  --template-body file://template.yaml
+
+# 스택 삭제
+aws cloudformation delete-stack --stack-name my-stack
+```
+
+## RDS 데이터베이스
+
+```bash
+# RDS 인스턴스 생성
+aws rds create-db-instance \
+  --db-instance-identifier mydb \
+  --db-instance-class db.t3.micro \
+  --engine postgres \
+  --master-username admin \
+  --master-user-password mypassword \
+  --allocated-storage 20
+
+# 스냅샷 생성
+aws rds create-db-snapshot \
+  --db-snapshot-identifier mydb-snapshot \
+  --db-instance-identifier mydb
+
+# 스냅샷에서 복원
+aws rds restore-db-instance-from-db-snapshot \
+  --db-instance-identifier mydb-restored \
+  --db-snapshot-identifier mydb-snapshot
+```
+
+## ECS (Fargate)
+
+```json
+// task-definition.json
+{
+  "family": "myapp",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "myapp",
+      "image": "myapp:latest",
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "production"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/myapp",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
+```
+
+## IAM 정책
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::my-bucket/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:Query"
+      ],
+      "Resource": "arn:aws:dynamodb:ap-northeast-2:123456789012:table/MyTable"
+    }
+  ]
+}
+```
+
+## AWS SDK (Node.js)
+
+```javascript
+const AWS = require('aws-sdk');
+
+// S3
+const s3 = new AWS.S3();
+
+async function uploadFile() {
+  const params = {
+    Bucket: 'my-bucket',
+    Key: 'file.txt',
+    Body: 'Hello, S3!'
+  };
+  
+  await s3.putObject(params).promise();
+}
+
+// DynamoDB
+const dynamodb = new AWS.DynamoDB.DocumentClient();
+
+async function getItem() {
+  const params = {
+    TableName: 'MyTable',
+    Key: {
+      id: '123'
+    }
+  };
+  
+  const result = await dynamodb.get(params).promise();
+  return result.Item;
+}
+
+// SQS
+const sqs = new AWS.SQS();
+
+async function sendMessage() {
+  const params = {
+    QueueUrl: 'https://sqs.ap-northeast-2.amazonaws.com/123456789012/MyQueue',
+    MessageBody: JSON.stringify({ message: 'Hello' })
+  };
+  
+  await sqs.sendMessage(params).promise();
+}
+```
+
+## 비용 최적화
+
+```bash
+# 사용하지 않는 리소스 찾기
+aws ec2 describe-volumes --filters Name=status,Values=available
+
+# 스냅샷 정리
+aws ec2 describe-snapshots --owner-ids self
+
+# 리저브드 인스턴스 구매
+aws ec2 purchase-reserved-instances-offering \
+  --reserved-instances-offering-id xyz \
+  --instance-count 1
+```
+
+## 언제 사용하나요?
+
+- 클라우드 인프라 구축
+- 서버리스 애플리케이션
+- 대규모 데이터 처리
+- 글로벌 서비스 배포
+- 엔터프라이즈 애플리케이션
+
+## 추가 자료
+
+- [공식 문서](https://docs.aws.amazon.com)
+- [AWS Free Tier](https://aws.amazon.com/free/)
+

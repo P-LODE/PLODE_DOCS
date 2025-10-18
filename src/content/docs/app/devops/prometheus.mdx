@@ -1,0 +1,302 @@
+---
+title: Prometheus
+description: 오픈소스 모니터링 및 알림 시스템
+---
+
+Prometheus는 메트릭 기반의 모니터링 시스템으로 시계열 데이터를 수집하고 저장합니다.
+
+## 주요 특징
+
+- **Pull 기반 수집**: 능동적으로 메트릭 수집
+- **다차원 데이터**: 레이블 기반 데이터 모델
+- **PromQL**: 강력한 쿼리 언어
+- **알림**: Alertmanager를 통한 알림
+- **시각화**: Grafana 통합
+
+## Docker로 설치
+
+```yaml
+# docker-compose.yml
+version: '3'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:
+```
+
+## 설정 파일
+
+```yaml
+# prometheus.yml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: 'app'
+    static_configs:
+      - targets: ['app:3000']
+```
+
+## Node.js 애플리케이션 메트릭
+
+```javascript
+const express = require('express');
+const promClient = require('prom-client');
+
+const app = express();
+
+// 기본 메트릭 수집
+const collectDefaultMetrics = promClient.collectDefaultMetrics;
+collectDefaultMetrics();
+
+// 커스텀 카운터
+const httpRequestCounter = new promClient.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'status']
+});
+
+// 커스텀 히스토그램
+const httpRequestDuration = new promClient.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'route', 'status'],
+  buckets: [0.1, 0.5, 1, 2, 5]
+});
+
+// 미들웨어
+app.use((req, res, next) => {
+  const start = Date.now();
+  
+  res.on('finish', () => {
+    const duration = (Date.now() - start) / 1000;
+    
+    httpRequestCounter.inc({
+      method: req.method,
+      route: req.route?.path || req.path,
+      status: res.statusCode
+    });
+    
+    httpRequestDuration.observe({
+      method: req.method,
+      route: req.route?.path || req.path,
+      status: res.statusCode
+    }, duration);
+  });
+  
+  next();
+});
+
+// 메트릭 엔드포인트
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', promClient.register.contentType);
+  res.end(await promClient.register.metrics());
+});
+
+app.listen(3000);
+```
+
+## PromQL 쿼리 예제
+
+```promql
+# 현재 값 조회
+http_requests_total
+
+# 레이블 필터링
+http_requests_total{method="GET", status="200"}
+
+# 속도 계산 (초당 요청수)
+rate(http_requests_total[5m])
+
+# 합계
+sum(rate(http_requests_total[5m])) by (method)
+
+# 평균 응답 시간
+rate(http_request_duration_seconds_sum[5m]) / rate(http_request_duration_seconds_count[5m])
+
+# CPU 사용률
+100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+# 메모리 사용률
+(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100
+
+# 디스크 사용률
+(node_filesystem_size_bytes - node_filesystem_avail_bytes) / node_filesystem_size_bytes * 100
+
+# 에러율
+sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))
+```
+
+## 알림 규칙
+
+```yaml
+# alert.rules.yml
+groups:
+  - name: example
+    interval: 30s
+    rules:
+      - alert: HighErrorRate
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "높은 에러율 감지"
+          description: "에러율이 {{ $value }}%입니다"
+      
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "높은 CPU 사용률"
+          description: "{{ $labels.instance }}의 CPU 사용률이 {{ $value }}%입니다"
+      
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 90
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "높은 메모리 사용률"
+          description: "메모리 사용률이 {{ $value }}%입니다"
+```
+
+## Alertmanager 설정
+
+```yaml
+# alertmanager.yml
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname', 'cluster']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default'
+  routes:
+    - match:
+        severity: critical
+      receiver: 'critical'
+
+receivers:
+  - name: 'default'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL'
+        channel: '#alerts'
+  
+  - name: 'critical'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL'
+        channel: '#critical-alerts'
+    pagerduty_configs:
+      - service_key: 'YOUR_PAGERDUTY_SERVICE_KEY'
+```
+
+## Go 애플리케이션 메트릭
+
+```go
+package main
+
+import (
+    "net/http"
+    "github.com/prometheus/client_golang/prometheus"
+    "github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+var (
+    httpRequests = prometheus.NewCounterVec(
+        prometheus.CounterOpts{
+            Name: "http_requests_total",
+            Help: "Total number of HTTP requests",
+        },
+        []string{"method", "endpoint", "status"},
+    )
+    
+    requestDuration = prometheus.NewHistogramVec(
+        prometheus.HistogramOpts{
+            Name:    "http_request_duration_seconds",
+            Help:    "HTTP request duration in seconds",
+            Buckets: prometheus.DefBuckets,
+        },
+        []string{"method", "endpoint"},
+    )
+)
+
+func init() {
+    prometheus.MustRegister(httpRequests)
+    prometheus.MustRegister(requestDuration)
+}
+
+func main() {
+    http.Handle("/metrics", promhttp.Handler())
+    http.ListenAndServe(":9090", nil)
+}
+```
+
+## 서비스 디스커버리
+
+```yaml
+# Kubernetes Service Discovery
+scrape_configs:
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+```
+
+## 언제 사용하나요?
+
+- 시스템 모니터링
+- 애플리케이션 성능 추적
+- 인프라 메트릭 수집
+- SLA 모니터링
+- 알림 시스템 구축
+
+## 추가 자료
+
+- [공식 문서](https://prometheus.io/docs/)
+- [PromQL 가이드](https://prometheus.io/docs/prometheus/latest/querying/basics/)
+

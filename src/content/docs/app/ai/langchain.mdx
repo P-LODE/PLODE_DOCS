@@ -1,0 +1,129 @@
+---
+title: LangChain
+description: LLM 애플리케이션 개발 프레임워크
+---
+
+LangChain은 대규모 언어 모델을 활용한 애플리케이션을 쉽게 개발할 수 있게 해주는 프레임워크입니다.
+
+## 주요 특징
+
+- **체인**: LLM 호출을 연결
+- **에이전트**: 자율적으로 작업 수행
+- **메모리**: 대화 컨텍스트 유지
+- **RAG**: 문서 기반 질의응답
+- **다양한 통합**: OpenAI, Anthropic 등
+
+## 설치하기
+
+```bash
+pip install langchain langchain-openai langchain-community
+```
+
+## 기본 사용법
+
+```python
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+
+# LLM 초기화
+llm = ChatOpenAI(model="gpt-4", temperature=0)
+
+# 프롬프트 템플릿
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "당신은 친절한 AI 어시스턴트입니다."),
+    ("human", "{input}")
+])
+
+# 체인 생성
+chain = prompt | llm
+
+# 실행
+response = chain.invoke({"input": "안녕하세요!"})
+print(response.content)
+```
+
+## RAG (문서 기반 QA)
+
+```python
+from langchain.document_loaders import TextLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.chains import RetrievalQA
+
+# 문서 로드
+loader = TextLoader("document.txt")
+documents = loader.load()
+
+# 텍스트 분할
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,
+    chunk_overlap=200
+)
+texts = text_splitter.split_documents(documents)
+
+# 벡터 스토어 생성
+embeddings = OpenAIEmbeddings()
+vectorstore = FAISS.from_documents(texts, embeddings)
+
+# QA 체인
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    chain_type="stuff",
+    retriever=vectorstore.as_retriever()
+)
+
+# 질문
+result = qa_chain.invoke("문서에서 핵심 내용은 무엇인가요?")
+print(result['result'])
+```
+
+## 에이전트
+
+```python
+from langchain.agents import create_openai_tools_agent, AgentExecutor
+from langchain.tools import Tool
+from langchain import hub
+
+# 도구 정의
+def calculator(expression: str) -> str:
+    try:
+        return str(eval(expression))
+    except:
+        return "계산 오류"
+
+tools = [
+    Tool(
+        name="Calculator",
+        func=calculator,
+        description="수학 계산을 수행합니다. 입력은 Python 표현식이어야 합니다."
+    )
+]
+
+# 프롬프트
+prompt = hub.pull("hwchase17/openai-tools-agent")
+
+# 에이전트 생성
+agent = create_openai_tools_agent(llm, tools, prompt)
+agent_executor = AgentExecutor(agent=agent, tools=tools)
+
+# 실행
+result = agent_executor.invoke({
+    "input": "25 곱하기 4는 얼마인가요?"
+})
+print(result['output'])
+```
+
+## 언제 사용하나요?
+
+- LLM 애플리케이션 개발
+- 챗봇 구축
+- 문서 질의응답 시스템
+- AI 에이전트
+- 자동화 워크플로우
+
+## 추가 자료
+
+- [공식 문서](https://python.langchain.com)
+- [LangChain Templates](https://github.com/langchain-ai/langchain/tree/master/templates)
+

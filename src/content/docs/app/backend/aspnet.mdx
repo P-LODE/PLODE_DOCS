@@ -1,0 +1,322 @@
+---
+title: ASP.NET Core
+description: .NET 기반의 크로스 플랫폼 고성능 프레임워크
+---
+
+ASP.NET Core는 현대적이고 클라우드 기반 인터넷 연결 애플리케이션을 구축하기 위한 크로스 플랫폼 고성능 프레임워크입니다.
+
+## 주요 특징
+
+- **크로스 플랫폼**: Windows, macOS, Linux에서 실행
+- **고성능**: 매우 빠른 처리 속도
+- **의존성 주입**: 내장 DI 컨테이너
+- **미들웨어 파이프라인**: 유연한 요청 처리
+- **통합 개발**: MVC, API, Blazor 등 통합 지원
+
+## 프로젝트 생성
+
+```bash
+dotnet new webapi -n MyApi
+cd MyApi
+dotnet run
+```
+
+## 기본 컨트롤러
+
+```csharp
+using Microsoft.AspNetCore.Mvc;
+
+[ApiController]
+[Route("api/[controller]")]
+public class UsersController : ControllerBase
+{
+    private readonly IUserService _userService;
+    
+    public UsersController(IUserService userService)
+    {
+        _userService = userService;
+    }
+    
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+    {
+        var users = await _userService.GetAllAsync();
+        return Ok(users);
+    }
+    
+    [HttpGet("{id}")]
+    public async Task<ActionResult<User>> GetUser(int id)
+    {
+        var user = await _userService.GetByIdAsync(id);
+        
+        if (user == null)
+            return NotFound();
+        
+        return Ok(user);
+    }
+    
+    [HttpPost]
+    public async Task<ActionResult<User>> CreateUser([FromBody] CreateUserDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        
+        var user = await _userService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+    }
+    
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto dto)
+    {
+        var result = await _userService.UpdateAsync(id, dto);
+        
+        if (!result)
+            return NotFound();
+        
+        return NoContent();
+    }
+    
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteUser(int id)
+    {
+        var result = await _userService.DeleteAsync(id);
+        
+        if (!result)
+            return NotFound();
+        
+        return NoContent();
+    }
+}
+```
+
+## 모델과 DTO
+
+```csharp
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+public class CreateUserDto
+{
+    [Required]
+    [StringLength(100)]
+    public string Name { get; set; }
+    
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; }
+    
+    [Required]
+    [MinLength(8)]
+    public string Password { get; set; }
+}
+
+public class UpdateUserDto
+{
+    [StringLength(100)]
+    public string Name { get; set; }
+    
+    [EmailAddress]
+    public string Email { get; set; }
+}
+```
+
+## Entity Framework Core
+
+```csharp
+using Microsoft.EntityFrameworkCore;
+
+public class AppDbContext : DbContext
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
+    {
+    }
+    
+    public DbSet<User> Users { get; set; }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
+            entity.HasIndex(e => e.Email).IsUnique();
+        });
+    }
+}
+
+// Program.cs
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+```
+
+## 서비스 Layer
+
+```csharp
+public interface IUserService
+{
+    Task<IEnumerable<User>> GetAllAsync();
+    Task<User> GetByIdAsync(int id);
+    Task<User> CreateAsync(CreateUserDto dto);
+    Task<bool> UpdateAsync(int id, UpdateUserDto dto);
+    Task<bool> DeleteAsync(int id);
+}
+
+public class UserService : IUserService
+{
+    private readonly AppDbContext _context;
+    
+    public UserService(AppDbContext context)
+    {
+        _context = context;
+    }
+    
+    public async Task<IEnumerable<User>> GetAllAsync()
+    {
+        return await _context.Users.ToListAsync();
+    }
+    
+    public async Task<User> GetByIdAsync(int id)
+    {
+        return await _context.Users.FindAsync(id);
+    }
+    
+    public async Task<User> CreateAsync(CreateUserDto dto)
+    {
+        var user = new User
+        {
+            Name = dto.Name,
+            Email = dto.Email,
+            CreatedAt = DateTime.UtcNow
+        };
+        
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+        
+        return user;
+    }
+    
+    public async Task<bool> UpdateAsync(int id, UpdateUserDto dto)
+    {
+        var user = await _context.Users.FindAsync(id);
+        
+        if (user == null)
+            return false;
+        
+        if (!string.IsNullOrEmpty(dto.Name))
+            user.Name = dto.Name;
+        
+        if (!string.IsNullOrEmpty(dto.Email))
+            user.Email = dto.Email;
+        
+        await _context.SaveChangesAsync();
+        return true;
+    }
+    
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var user = await _context.Users.FindAsync(id);
+        
+        if (user == null)
+            return false;
+        
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
+        
+        return true;
+    }
+}
+```
+
+## 미들웨어
+
+```csharp
+public class RequestLoggingMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly ILogger<RequestLoggingMiddleware> _logger;
+    
+    public RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
+    
+    public async Task InvokeAsync(HttpContext context)
+    {
+        _logger.LogInformation($"요청: {context.Request.Method} {context.Request.Path}");
+        
+        await _next(context);
+        
+        _logger.LogInformation($"응답: {context.Response.StatusCode}");
+    }
+}
+
+// Program.cs
+app.UseMiddleware<RequestLoggingMiddleware>();
+```
+
+## 의존성 주입 (Program.cs)
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+// 서비스 등록
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// 데이터베이스
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 비즈니스 서비스
+builder.Services.AddScoped<IUserService, UserService>();
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
+var app = builder.Build();
+
+// 미들웨어 파이프라인
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseCors("AllowAll");
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
+```
+
+## 언제 사용하나요?
+
+- 엔터프라이즈 애플리케이션
+- 고성능 API 서버
+- 마이크로서비스
+- 실시간 애플리케이션 (SignalR)
+- Azure 클라우드 애플리케이션
+
+## 추가 자료
+
+- [공식 문서](https://docs.microsoft.com/aspnet/core)
+- [.NET 가이드](https://dotnet.microsoft.com/learn)
+

@@ -1,6 +1,6 @@
 import type { StarlightUserConfig } from "@astrojs/starlight/types";
 import { openAPISidebarGroups } from "starlight-openapi";
-import { group } from "./src/config/sidebar";
+import { group } from "./src/config/sidebar.js";
 
 // Define icons for top-level sidebar groups
 // This is separate from the sidebar configuration to avoid Starlight schema validation errors
@@ -819,7 +819,7 @@ export const sidebar = [
     ],
   }),
 
-  // --- APP Tab (Frontend Technologies) ---
+  // --- APP Tab (Frontend, Backend, DevOps, AI) ---
   {
     label: "App",
     items: [
@@ -837,6 +837,54 @@ export const sidebar = [
           "app/front/tailwind",
           "app/front/redux",
           "app/front/react-query",
+        ],
+      },
+      {
+        label: "Backend",
+        collapsed: true,
+        items: [
+          "app/backend/nodejs",
+          "app/backend/express",
+          "app/backend/nestjs",
+          "app/backend/django",
+          "app/backend/fastapi",
+          "app/backend/spring-boot",
+          "app/backend/laravel",
+          "app/backend/rails",
+          "app/backend/go",
+          "app/backend/aspnet",
+        ],
+      },
+      {
+        label: "DevOps",
+        collapsed: true,
+        items: [
+          "app/devops/docker",
+          "app/devops/kubernetes",
+          "app/devops/jenkins",
+          "app/devops/github-actions",
+          "app/devops/terraform",
+          "app/devops/ansible",
+          "app/devops/prometheus",
+          "app/devops/grafana",
+          "app/devops/aws",
+          "app/devops/azure",
+        ],
+      },
+      {
+        label: "AI",
+        collapsed: true,
+        items: [
+          "app/ai/tensorflow",
+          "app/ai/pytorch",
+          "app/ai/langchain",
+          "app/ai/openai",
+          "app/ai/huggingface",
+          "app/ai/llamaindex",
+          "app/ai/pinecone",
+          "app/ai/weaviate",
+          "app/ai/autogen",
+          "app/ai/crewai",
         ],
       },
     ],

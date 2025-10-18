@@ -1,0 +1,357 @@
+---
+title: Ansible
+description: 자동화된 구성 관리 도구
+---
+
+Ansible은 에이전트 없이 SSH를 통해 서버를 자동으로 구성하고 관리하는 도구입니다.
+
+## 주요 특징
+
+- **에이전트 불필요**: SSH만 있으면 됨
+- **간단한 문법**: YAML 기반
+- **멱등성**: 여러 번 실행해도 같은 결과
+- **대규모 자동화**: 수천 대의 서버 관리
+- **풍부한 모듈**: 5000개 이상의 모듈
+
+## 설치하기
+
+```bash
+# macOS
+brew install ansible
+
+# Ubuntu
+sudo apt update
+sudo apt install ansible
+
+# Python pip
+pip install ansible
+
+# 버전 확인
+ansible --version
+```
+
+## Inventory 파일
+
+```ini
+# inventory/hosts
+[web]
+web1.example.com
+web2.example.com
+web3.example.com
+
+[db]
+db1.example.com
+db2.example.com
+
+[web:vars]
+ansible_user=ubuntu
+ansible_ssh_private_key_file=~/.ssh/id_rsa
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+```
+
+## 기본 Playbook
+
+```yaml
+# playbook.yml
+---
+- name: 웹 서버 설정
+  hosts: web
+  become: yes
+  
+  tasks:
+    - name: Nginx 설치
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+    
+    - name: Nginx 서비스 시작
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+    
+    - name: 인덱스 파일 복사
+      copy:
+        src: files/index.html
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+```
+
+## 실행 명령어
+
+```bash
+# Playbook 실행
+ansible-playbook playbook.yml
+
+# 특정 호스트만
+ansible-playbook playbook.yml --limit web1.example.com
+
+# 드라이런 (테스트)
+ansible-playbook playbook.yml --check
+
+# 상세 출력
+ansible-playbook playbook.yml -v
+
+# Ad-hoc 명령
+ansible web -m ping
+ansible all -a "uptime"
+ansible web -m apt -a "name=nginx state=present" --become
+```
+
+## 변수 사용
+
+```yaml
+# vars.yml
+---
+app_name: myapp
+app_port: 3000
+db_host: localhost
+db_name: mydb
+```
+
+```yaml
+# playbook.yml
+---
+- name: 애플리케이션 배포
+  hosts: web
+  become: yes
+  vars_files:
+    - vars.yml
+  
+  tasks:
+    - name: 애플리케이션 디렉토리 생성
+      file:
+        path: "/opt/{{ app_name }}"
+        state: directory
+        owner: www-data
+        group: www-data
+    
+    - name: 설정 파일 생성
+      template:
+        src: templates/config.j2
+        dest: "/opt/{{ app_name }}/config.json"
+```
+
+## 템플릿 (Jinja2)
+
+```jinja2
+{# templates/config.j2 #}
+{
+  "app_name": "{{ app_name }}",
+  "port": {{ app_port }},
+  "database": {
+    "host": "{{ db_host }}",
+    "name": "{{ db_name }}"
+  }
+}
+```
+
+## 핸들러
+
+```yaml
+---
+- name: Nginx 설정 업데이트
+  hosts: web
+  become: yes
+  
+  tasks:
+    - name: Nginx 설정 파일 복사
+      copy:
+        src: files/nginx.conf
+        dest: /etc/nginx/nginx.conf
+      notify:
+        - reload nginx
+    
+    - name: 사이트 설정 복사
+      template:
+        src: templates/site.conf.j2
+        dest: /etc/nginx/sites-available/default
+      notify:
+        - reload nginx
+  
+  handlers:
+    - name: reload nginx
+      service:
+        name: nginx
+        state: reloaded
+```
+
+## 조건문과 반복문
+
+```yaml
+---
+- name: 조건부 작업
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Ubuntu에서만 실행
+      apt:
+        name: nginx
+        state: present
+      when: ansible_distribution == "Ubuntu"
+    
+    - name: CentOS에서만 실행
+      yum:
+        name: nginx
+        state: present
+      when: ansible_distribution == "CentOS"
+    
+    - name: 여러 패키지 설치
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - git
+        - curl
+        - vim
+        - htop
+    
+    - name: 여러 사용자 생성
+      user:
+        name: "{{ item.name }}"
+        group: "{{ item.group }}"
+        state: present
+      loop:
+        - { name: 'alice', group: 'developers' }
+        - { name: 'bob', group: 'developers' }
+        - { name: 'charlie', group: 'admins' }
+```
+
+## Role 구조
+
+```
+roles/
+└── webserver/
+    ├── tasks/
+    │   └── main.yml
+    ├── handlers/
+    │   └── main.yml
+    ├── templates/
+    │   └── nginx.conf.j2
+    ├── files/
+    │   └── index.html
+    ├── vars/
+    │   └── main.yml
+    ├── defaults/
+    │   └── main.yml
+    └── meta/
+        └── main.yml
+```
+
+```yaml
+# roles/webserver/tasks/main.yml
+---
+- name: Nginx 설치
+  apt:
+    name: nginx
+    state: present
+
+- name: 설정 파일 배포
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify: reload nginx
+```
+
+```yaml
+# playbook.yml
+---
+- name: 웹 서버 구성
+  hosts: web
+  become: yes
+  
+  roles:
+    - webserver
+    - firewall
+    - monitoring
+```
+
+## Docker 컨테이너 관리
+
+```yaml
+---
+- name: Docker 컨테이너 배포
+  hosts: web
+  become: yes
+  
+  tasks:
+    - name: Docker 이미지 Pull
+      docker_image:
+        name: nginx
+        tag: latest
+        source: pull
+    
+    - name: Docker 컨테이너 실행
+      docker_container:
+        name: web
+        image: nginx:latest
+        state: started
+        ports:
+          - "80:80"
+        volumes:
+          - /opt/www:/usr/share/nginx/html
+        restart_policy: always
+```
+
+## Vault (암호화)
+
+```bash
+# Vault 파일 생성
+ansible-vault create secrets.yml
+
+# Vault 파일 편집
+ansible-vault edit secrets.yml
+
+# Vault 파일 포함하여 실행
+ansible-playbook playbook.yml --ask-vault-pass
+```
+
+```yaml
+# secrets.yml (암호화됨)
+---
+db_password: "super_secret_password"
+api_key: "my_api_key_12345"
+```
+
+## Galaxy (Role 공유)
+
+```bash
+# Role 설치
+ansible-galaxy install geerlingguy.nginx
+
+# Role 생성
+ansible-galaxy init my-role
+
+# requirements.yml
+ansible-galaxy install -r requirements.yml
+```
+
+```yaml
+# requirements.yml
+---
+- name: geerlingguy.nginx
+  version: 3.1.4
+
+- name: geerlingguy.docker
+  version: 6.1.0
+```
+
+## 언제 사용하나요?
+
+- 서버 구성 자동화
+- 애플리케이션 배포
+- 시스템 업데이트
+- 클라우드 프로비저닝
+- 네트워크 장비 설정
+
+## 추가 자료
+
+- [공식 문서](https://docs.ansible.com)
+- [Ansible Galaxy](https://galaxy.ansible.com)
+

@@ -1,0 +1,441 @@
+---
+title: Azure
+description: Microsoft 클라우드 컴퓨팅 플랫폼
+---
+
+Azure는 Microsoft가 제공하는 클라우드 컴퓨팅 플랫폼으로 200개 이상의 서비스를 제공합니다.
+
+## 주요 서비스
+
+### 컴퓨팅
+- **Virtual Machines**: 가상 머신
+- **App Service**: 웹 앱 호스팅
+- **Functions**: 서버리스 함수
+- **AKS**: Kubernetes 서비스
+
+### 스토리지
+- **Blob Storage**: 객체 스토리지
+- **File Storage**: 파일 공유
+- **Queue Storage**: 메시지 큐
+- **Table Storage**: NoSQL 스토리지
+
+### 데이터베이스
+- **SQL Database**: 관계형 데이터베이스
+- **Cosmos DB**: 글로벌 분산 데이터베이스
+- **MySQL/PostgreSQL**: 오픈소스 데이터베이스
+- **Redis Cache**: 인메모리 캐시
+
+## Azure CLI 설치
+
+```bash
+# macOS
+brew install azure-cli
+
+# Ubuntu
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+# 로그인
+az login
+
+# 구독 설정
+az account set --subscription "My Subscription"
+```
+
+## Virtual Machine 생성
+
+```bash
+# 리소스 그룹 생성
+az group create --name myResourceGroup --location eastus
+
+# VM 생성
+az vm create \
+  --resource-group myResourceGroup \
+  --name myVM \
+  --image UbuntuLTS \
+  --size Standard_B2s \
+  --admin-username azureuser \
+  --generate-ssh-keys
+
+# VM 시작
+az vm start --resource-group myResourceGroup --name myVM
+
+# VM 중지
+az vm stop --resource-group myResourceGroup --name myVM
+
+# VM 삭제
+az vm delete --resource-group myResourceGroup --name myVM
+```
+
+## Blob Storage
+
+```bash
+# 스토리지 계정 생성
+az storage account create \
+  --name mystorageaccount \
+  --resource-group myResourceGroup \
+  --location eastus \
+  --sku Standard_LRS
+
+# 컨테이너 생성
+az storage container create \
+  --name mycontainer \
+  --account-name mystorageaccount
+
+# 파일 업로드
+az storage blob upload \
+  --container-name mycontainer \
+  --name myblob \
+  --file ./localfile.txt \
+  --account-name mystorageaccount
+
+# 파일 다운로드
+az storage blob download \
+  --container-name mycontainer \
+  --name myblob \
+  --file ./downloaded.txt \
+  --account-name mystorageaccount
+```
+
+## Azure Functions
+
+```javascript
+// index.js
+module.exports = async function (context, req) {
+    context.log('JavaScript HTTP trigger function processed a request.');
+
+    const name = (req.query.name || (req.body && req.body.name));
+    const responseMessage = name
+        ? `안녕하세요, ${name}님!`
+        : "이름을 입력해주세요.";
+
+    context.res = {
+        status: 200,
+        body: responseMessage
+    };
+}
+```
+
+```json
+// function.json
+{
+  "bindings": [
+    {
+      "authLevel": "anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": ["get", "post"]
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    }
+  ]
+}
+```
+
+```bash
+# Function App 생성
+az functionapp create \
+  --resource-group myResourceGroup \
+  --name myfunctionapp \
+  --storage-account mystorageaccount \
+  --runtime node \
+  --runtime-version 18 \
+  --functions-version 4
+
+# 배포
+func azure functionapp publish myfunctionapp
+```
+
+## ARM 템플릿
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "defaultValue": "myVM"
+    },
+    "adminUsername": {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "securestring"
+    }
+  },
+  "variables": {
+    "nicName": "[concat(parameters('vmName'), '-nic')]",
+    "vnetName": "myVNet",
+    "subnetName": "mySubnet"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('vnetName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": ["10.0.0.0/16"]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "10.0.0.0/24"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2021-03-01",
+      "name": "[parameters('vmName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "Standard_B2s"
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "18.04-LTS",
+            "version": "latest"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+```bash
+# 템플릿 배포
+az deployment group create \
+  --resource-group myResourceGroup \
+  --template-file template.json \
+  --parameters vmName=myVM adminUsername=azureuser adminPassword=Password123!
+```
+
+## AKS (Azure Kubernetes Service)
+
+```bash
+# AKS 클러스터 생성
+az aks create \
+  --resource-group myResourceGroup \
+  --name myAKSCluster \
+  --node-count 3 \
+  --enable-addons monitoring \
+  --generate-ssh-keys
+
+# 자격 증명 가져오기
+az aks get-credentials \
+  --resource-group myResourceGroup \
+  --name myAKSCluster
+
+# 클러스터 확인
+kubectl get nodes
+
+# 클러스터 스케일링
+az aks scale \
+  --resource-group myResourceGroup \
+  --name myAKSCluster \
+  --node-count 5
+```
+
+## Azure SQL Database
+
+```bash
+# SQL Server 생성
+az sql server create \
+  --name myserver \
+  --resource-group myResourceGroup \
+  --location eastus \
+  --admin-user myadmin \
+  --admin-password Password123!
+
+# 데이터베이스 생성
+az sql db create \
+  --resource-group myResourceGroup \
+  --server myserver \
+  --name mydb \
+  --service-objective S0
+
+# 방화벽 규칙 추가
+az sql server firewall-rule create \
+  --resource-group myResourceGroup \
+  --server myserver \
+  --name AllowMyIP \
+  --start-ip-address 1.2.3.4 \
+  --end-ip-address 1.2.3.4
+```
+
+## Azure DevOps Pipeline
+
+```yaml
+# azure-pipelines.yml
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  dockerRegistryServiceConnection: 'myDockerRegistry'
+  imageRepository: 'myapp'
+  containerRegistry: 'myregistry.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  tag: '$(Build.BuildId)'
+
+stages:
+  - stage: Build
+    displayName: Build and push stage
+    jobs:
+      - job: Build
+        displayName: Build
+        steps:
+          - task: Docker@2
+            displayName: Build and push an image
+            inputs:
+              command: buildAndPush
+              repository: $(imageRepository)
+              dockerfile: $(dockerfilePath)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              tags: |
+                $(tag)
+                latest
+
+  - stage: Deploy
+    displayName: Deploy stage
+    dependsOn: Build
+    jobs:
+      - deployment: Deploy
+        displayName: Deploy to AKS
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: KubernetesManifest@0
+                  displayName: Deploy to Kubernetes
+                  inputs:
+                    action: deploy
+                    manifests: |
+                      $(Pipeline.Workspace)/manifests/deployment.yml
+                      $(Pipeline.Workspace)/manifests/service.yml
+```
+
+## Azure SDK (Node.js)
+
+```javascript
+const { BlobServiceClient } = require('@azure/storage-blob');
+const { CosmosClient } = require('@azure/cosmos');
+
+// Blob Storage
+const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
+
+async function uploadBlob() {
+  const containerClient = blobServiceClient.getContainerClient('mycontainer');
+  const blockBlobClient = containerClient.getBlockBlobClient('myblob.txt');
+  
+  await blockBlobClient.upload('Hello, Azure!', 13);
+}
+
+// Cosmos DB
+const cosmosClient = new CosmosClient({
+  endpoint: process.env.COSMOS_ENDPOINT,
+  key: process.env.COSMOS_KEY
+});
+
+async function createItem() {
+  const database = cosmosClient.database('mydb');
+  const container = database.container('mycontainer');
+  
+  const item = {
+    id: '1',
+    name: 'Item 1',
+    category: 'Category A'
+  };
+  
+  await container.items.create(item);
+}
+```
+
+## 모니터링 (Application Insights)
+
+```javascript
+const appInsights = require('applicationinsights');
+
+appInsights.setup(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING)
+  .setAutoDependencyCorrelation(true)
+  .setAutoCollectRequests(true)
+  .setAutoCollectPerformance(true)
+  .setAutoCollectExceptions(true)
+  .setAutoCollectDependencies(true)
+  .setAutoCollectConsole(true)
+  .setUseDiskRetryCaching(true)
+  .start();
+
+const client = appInsights.defaultClient;
+
+// 커스텀 이벤트
+client.trackEvent({ name: 'UserLogin', properties: { userId: '123' } });
+
+// 커스텀 메트릭
+client.trackMetric({ name: 'ResponseTime', value: 150 });
+
+// 예외 추적
+try {
+  // 코드
+} catch (error) {
+  client.trackException({ exception: error });
+}
+```
+
+## 비용 관리
+
+```bash
+# 비용 분석
+az consumption usage list --start-date 2024-01-01 --end-date 2024-01-31
+
+# 예산 생성
+az consumption budget create \
+  --amount 1000 \
+  --budget-name myBudget \
+  --category Cost \
+  --time-grain Monthly
+
+# 리소스 태그
+az resource tag \
+  --tags Environment=Production CostCenter=IT \
+  --resource-group myResourceGroup
+```
+
+## 언제 사용하나요?
+
+- Microsoft 기술 스택 사용 시
+- 하이브리드 클라우드
+- 엔터프라이즈 애플리케이션
+- AI/ML 서비스
+- Windows 워크로드
+
+## 추가 자료
+
+- [공식 문서](https://docs.microsoft.com/azure)
+- [Azure Free Account](https://azure.microsoft.com/free/)
+
