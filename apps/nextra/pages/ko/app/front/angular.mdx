@@ -1,0 +1,65 @@
+# Angular
+
+Angular는 타입스크립트 기반의 오픈 소스 웹 애플리케이션 프레임워크입니다.
+
+## 주요 특징
+
+- **완전한 프레임워크**: 라우팅, 상태 관리, HTTP 클라이언트 등 모든 것을 제공합니다
+- **TypeScript 기반**: 타입 안정성과 개발자 경험을 향상시킵니다
+- **의존성 주입**: 강력한 DI 시스템을 제공합니다
+- **양방향 데이터 바인딩**: 모델과 뷰를 자동으로 동기화합니다
+
+## 설치하기
+
+```bash
+npm install -g @angular/cli
+ng new my-app
+cd my-app
+ng serve
+```
+
+## 기본 예제
+
+```typescript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-counter',
+  template: `
+    <div>
+      <p>카운트: {{ count }}</p>
+      <button (click)="increment()">증가</button>
+    </div>
+  `,
+  styles: [`
+    button {
+      padding: 8px 16px;
+      background: #dd0031;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  `]
+})
+export class CounterComponent {
+  count = 0;
+
+  increment() {
+    this.count++;
+  }
+}
+```
+
+## 언제 사용하나요?
+
+- 대규모 엔터프라이즈 애플리케이션 개발
+- 강력한 타입 시스템이 필요한 프로젝트
+- 팀 협업이 많은 프로젝트
+- 구조화된 개발 패턴이 필요할 때
+
+## 추가 자료
+
+- [공식 문서](https://angular.io)
+- [Angular 튜토리얼](https://angular.io/tutorial)
+

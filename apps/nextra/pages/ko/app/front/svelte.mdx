@@ -1,0 +1,95 @@
+# Svelte
+
+Svelte는 컴파일러 기반의 혁신적인 프론트엔드 프레임워크입니다.
+
+## 주요 특징
+
+- **컴파일러 기반**: 런타임 오버헤드가 없습니다
+- **반응형 선언**: 간단하고 직관적인 반응형 프로그래밍
+- **적은 보일러플레이트**: 더 적은 코드로 더 많은 작업
+- **빠른 성능**: 작은 번들 크기와 빠른 실행 속도
+- **내장 애니메이션**: 쉽게 사용할 수 있는 애니메이션 기능
+
+## 설치하기
+
+```bash
+npm create vite@latest my-app -- --template svelte
+cd my-app
+npm install
+npm run dev
+```
+
+또는 SvelteKit을 사용하여:
+```bash
+npm create svelte@latest my-app
+cd my-app
+npm install
+npm run dev
+```
+
+## 기본 예제
+
+```svelte
+<script>
+  let count = 0;
+
+  function increment() {
+    count += 1;
+  }
+</script>
+
+<main>
+  <h1>Svelte 카운터</h1>
+  <p>카운트: {count}</p>
+  <button on:click={increment}>
+    증가
+  </button>
+</main>
+
+<style>
+  button {
+    padding: 8px 16px;
+    background: #ff3e00;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #ff5722;
+  }
+</style>
+```
+
+## 반응형 선언 예제
+
+```svelte
+<script>
+  let count = 0;
+  
+  // 반응형 선언 - count가 변경되면 자동으로 재계산
+  $: doubled = count * 2;
+  $: quadrupled = doubled * 2;
+</script>
+
+<div>
+  <p>{count} * 2 = {doubled}</p>
+  <p>{count} * 4 = {quadrupled}</p>
+  <button on:click={() => count += 1}>증가</button>
+</div>
+```
+
+## 언제 사용하나요?
+
+- 성능이 중요한 애플리케이션
+- 작은 번들 크기가 필요한 프로젝트
+- 간결한 코드를 선호하는 경우
+- 새로운 기술을 시도해보고 싶을 때
+
+## 추가 자료
+
+- [공식 문서](https://svelte.dev)
+- [Svelte 튜토리얼](https://svelte.dev/tutorial)
+- [SvelteKit](https://kit.svelte.dev)
+

@@ -1,0 +1,67 @@
+---
+title: Vue
+description: 사용자 인터페이스를 구축하기 위한 프로그레시브 JavaScript 프레임워크
+---
+
+Vue는 사용자 인터페이스를 구축하기 위한 프로그레시브 JavaScript 프레임워크입니다.
+
+## 주요 특징
+
+- **접근성이 좋음**: 배우기 쉽고 시작하기 간편합니다
+- **반응형 데이터 바인딩**: 자동으로 UI를 업데이트합니다
+- **컴포넌트 시스템**: 재사용 가능한 컴포넌트를 만들 수 있습니다
+- **유연성**: 점진적으로 도입할 수 있습니다
+
+## 설치하기
+
+```bash
+npm create vue@latest
+cd my-vue-app
+npm install
+npm run dev
+```
+
+## 기본 예제
+
+```vue
+<script setup>
+import { ref } from 'vue'
+
+const count = ref(0)
+
+function increment() {
+  count.value++
+}
+</script>
+
+<template>
+  <div>
+    <p>카운트: {{ count }}</p>
+    <button @click="increment">증가</button>
+  </div>
+</template>
+
+<style scoped>
+button {
+  padding: 8px 16px;
+  background: #42b883;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+</style>
+```
+
+## 언제 사용하나요?
+
+- 빠르게 프로토타입을 만들 때
+- 기존 프로젝트에 점진적으로 통합할 때
+- 중소규모 웹 애플리케이션 개발
+- 직관적인 API가 필요한 프로젝트
+
+## 추가 자료
+
+- [공식 문서](https://vuejs.org)
+- [Vue 가이드](https://vuejs.org/guide/)
+

@@ -1,0 +1,64 @@
+# Next.js
+
+Next.js는 React 기반의 풀스택 웹 애플리케이션 프레임워크입니다.
+
+## 주요 특징
+
+- **서버 사이드 렌더링(SSR)**: SEO 최적화와 빠른 초기 로딩
+- **정적 사이트 생성(SSG)**: 빌드 시점에 페이지를 생성합니다
+- **파일 기반 라우팅**: 직관적인 페이지 구조
+- **API 라우트**: 백엔드 API를 같은 프로젝트에서 구축
+- **이미지 최적화**: 자동으로 이미지를 최적화합니다
+
+## 설치하기
+
+```bash
+npx create-next-app@latest my-app
+cd my-app
+npm run dev
+```
+
+## 기본 예제
+
+```tsx
+// app/page.tsx
+'use client'
+
+import { useState } from 'react'
+
+export default function Home() {
+  const [count, setCount] = useState(0)
+
+  return (
+    <main>
+      <h1>Next.js 카운터</h1>
+      <p>카운트: {count}</p>
+      <button onClick={() => setCount(count + 1)}>
+        증가
+      </button>
+    </main>
+  )
+}
+```
+
+## API 라우트 예제
+
+```typescript
+// app/api/hello/route.ts
+export async function GET() {
+  return Response.json({ message: '안녕하세요!' })
+}
+```
+
+## 언제 사용하나요?
+
+- SEO가 중요한 웹사이트 (블로그, 마케팅 사이트)
+- 전자상거래 플랫폼
+- 서버 사이드 렌더링이 필요한 애플리케이션
+- 풀스택 프로젝트
+
+## 추가 자료
+
+- [공식 문서](https://nextjs.org)
+- [Next.js 학습](https://nextjs.org/learn)
+

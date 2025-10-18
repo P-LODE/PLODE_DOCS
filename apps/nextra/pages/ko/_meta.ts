@@ -59,6 +59,15 @@ export default {
       },
     },
   },
+  app: {
+    type: "menu",
+    title: "App",
+    items: {
+      front: {
+        title: "Frontend",
+      },
+    },
+  },
   "developer-platforms": {
     type: "menu",
     title: "Additional Resources",

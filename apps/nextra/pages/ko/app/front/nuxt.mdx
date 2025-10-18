@@ -1,0 +1,84 @@
+# Nuxt
+
+Nuxt는 Vue.js 기반의 직관적이고 강력한 웹 프레임워크입니다.
+
+## 주요 특징
+
+- **Vue 기반**: Vue.js의 모든 장점을 활용합니다
+- **서버 사이드 렌더링**: SEO 최적화와 성능 향상
+- **자동 라우팅**: 파일 구조 기반 자동 라우팅
+- **모듈 생태계**: 풍부한 모듈 시스템
+- **타입스크립트 지원**: 기본적으로 타입스크립트를 지원합니다
+
+## 설치하기
+
+```bash
+npx nuxi@latest init my-app
+cd my-app
+npm install
+npm run dev
+```
+
+## 기본 예제
+
+```vue
+<!-- pages/index.vue -->
+<script setup lang="ts">
+const count = ref(0)
+
+function increment() {
+  count.value++
+}
+</script>
+
+<template>
+  <div>
+    <h1>Nuxt 카운터</h1>
+    <p>카운트: {{ count }}</p>
+    <button @click="increment">증가</button>
+  </div>
+</template>
+
+<style scoped>
+button {
+  padding: 8px 16px;
+  background: #00dc82;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+</style>
+```
+
+## 데이터 페칭 예제
+
+```vue
+<script setup lang="ts">
+const { data } = await useFetch('/api/users')
+</script>
+
+<template>
+  <div>
+    <h2>사용자 목록</h2>
+    <ul>
+      <li v-for="user in data" :key="user.id">
+        {{ user.name }}
+      </li>
+    </ul>
+  </div>
+</template>
+```
+
+## 언제 사용하나요?
+
+- Vue 생태계를 활용한 풀스택 개발
+- SEO가 중요한 Vue 프로젝트
+- 콘텐츠 중심의 웹사이트
+- 빠른 개발 속도가 필요한 프로젝트
+
+## 추가 자료
+
+- [공식 문서](https://nuxt.com)
+- [Nuxt 예제](https://nuxt.com/docs/examples)
+

@@ -1,0 +1,148 @@
+# TypeScript
+
+TypeScript는 JavaScript에 타입을 추가한 프로그래밍 언어입니다.
+
+## 주요 특징
+
+- **정적 타입 검사**: 컴파일 시점에 오류를 발견합니다
+- **향상된 IDE 지원**: 자동완성, 리팩토링 등이 개선됩니다
+- **최신 JavaScript 기능**: ES6+ 기능을 사용할 수 있습니다
+- **점진적 도입**: 기존 JavaScript 프로젝트에 점진적으로 적용 가능
+- **대규모 프로젝트에 적합**: 코드 유지보수성을 향상시킵니다
+
+## 설치하기
+
+```bash
+npm install -g typescript
+```
+
+프로젝트에 설치:
+
+```bash
+npm install --save-dev typescript
+npx tsc --init
+```
+
+## 기본 예제
+
+```typescript
+// 기본 타입
+let count: number = 0;
+let message: string = "안녕하세요";
+let isActive: boolean = true;
+
+// 배열
+let numbers: number[] = [1, 2, 3, 4, 5];
+let names: Array<string> = ["철수", "영희", "민수"];
+
+// 객체
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  age?: number; // 선택적 프로퍼티
+}
+
+const user: User = {
+  id: 1,
+  name: "김철수",
+  email: "kim@example.com"
+};
+
+// 함수
+function greet(name: string): string {
+  return `안녕하세요, ${name}님!`;
+}
+
+function add(a: number, b: number): number {
+  return a + b;
+}
+```
+
+## 고급 타입 예제
+
+```typescript
+// 제네릭
+function identity<T>(arg: T): T {
+  return arg;
+}
+
+const output = identity<string>("안녕하세요");
+
+// 유니온 타입
+type Status = "pending" | "success" | "error";
+
+function handleStatus(status: Status) {
+  switch (status) {
+    case "pending":
+      console.log("처리 중...");
+      break;
+    case "success":
+      console.log("성공!");
+      break;
+    case "error":
+      console.log("오류 발생");
+      break;
+  }
+}
+
+// 타입 가드
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+// 유틸리티 타입
+interface Todo {
+  title: string;
+  description: string;
+  completed: boolean;
+}
+
+type PartialTodo = Partial<Todo>; // 모든 프로퍼티를 선택적으로
+type ReadonlyTodo = Readonly<Todo>; // 모든 프로퍼티를 읽기 전용으로
+type TodoPreview = Pick<Todo, "title" | "completed">; // 특정 프로퍼티만 선택
+```
+
+## React와 함께 사용
+
+```tsx
+import { useState } from 'react';
+
+interface Props {
+  title: string;
+  count?: number;
+}
+
+const Counter: React.FC<Props> = ({ title, count = 0 }) => {
+  const [value, setValue] = useState<number>(count);
+
+  const increment = (): void => {
+    setValue(prev => prev + 1);
+  };
+
+  return (
+    <div>
+      <h2>{title}</h2>
+      <p>카운트: {value}</p>
+      <button onClick={increment}>증가</button>
+    </div>
+  );
+};
+
+export default Counter;
+```
+
+## 언제 사용하나요?
+
+- 대규모 애플리케이션 개발
+- 팀 프로젝트에서 코드 품질 향상
+- 리팩토링이 빈번한 프로젝트
+- 버그를 사전에 방지하고 싶을 때
+- 모든 현대적인 프론트엔드 프로젝트 (권장)
+
+## 추가 자료
+
+- [공식 문서](https://www.typescriptlang.org)
+- [TypeScript 핸드북](https://www.typescriptlang.org/docs/handbook/intro.html)
+- [TypeScript 플레이그라운드](https://www.typescriptlang.org/play)
+

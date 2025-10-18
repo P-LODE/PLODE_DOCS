@@ -1,0 +1,122 @@
+---
+title: Tailwind CSS
+description: 유틸리티 우선 CSS 프레임워크
+---
+
+Tailwind CSS는 유틸리티 우선 CSS 프레임워크입니다.
+
+## 주요 특징
+
+- **유틸리티 클래스**: 미리 정의된 클래스로 빠르게 스타일링
+- **반응형 디자인**: 간편한 반응형 유틸리티
+- **커스터마이징**: 디자인 시스템을 쉽게 구성
+- **작은 번들 크기**: 사용하지 않는 CSS는 자동으로 제거
+- **개발 속도 향상**: CSS 파일을 오가지 않고 빠르게 개발
+
+## 설치하기
+
+```bash
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+```
+
+설정 파일 (`tailwind.config.js`):
+
+```javascript
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+CSS 파일에 추가:
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+## 기본 예제
+
+```jsx
+function Card() {
+  return (
+    <div className="max-w-sm rounded-lg overflow-hidden shadow-lg bg-white">
+      <img 
+        className="w-full h-48 object-cover" 
+        src="/image.jpg" 
+        alt="카드 이미지" 
+      />
+      <div className="px-6 py-4">
+        <h2 className="font-bold text-xl mb-2 text-gray-800">
+          카드 제목
+        </h2>
+        <p className="text-gray-700 text-base">
+          카드 설명이 여기에 들어갑니다.
+        </p>
+      </div>
+      <div className="px-6 pt-4 pb-6">
+        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300">
+          자세히 보기
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+## 반응형 디자인
+
+```jsx
+function ResponsiveGrid() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+      <div className="bg-blue-500 p-6 rounded-lg text-white">아이템 1</div>
+      <div className="bg-green-500 p-6 rounded-lg text-white">아이템 2</div>
+      <div className="bg-purple-500 p-6 rounded-lg text-white">아이템 3</div>
+      <div className="bg-pink-500 p-6 rounded-lg text-white">아이템 4</div>
+    </div>
+  );
+}
+```
+
+## 다크 모드
+
+```jsx
+function DarkModeExample() {
+  return (
+    <div className="bg-white dark:bg-gray-900 min-h-screen">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          다크 모드 지원
+        </h1>
+        <p className="text-gray-700 dark:text-gray-300">
+          다크 모드에서 자동으로 색상이 변경됩니다.
+        </p>
+      </div>
+    </div>
+  );
+}
+```
+
+## 언제 사용하나요?
+
+- 빠른 프로토타이핑이 필요할 때
+- 일관된 디자인 시스템을 구축할 때
+- CSS 작성 시간을 줄이고 싶을 때
+- 반응형 디자인을 쉽게 구현하고 싶을 때
+- 커스텀 디자인이 필요한 모든 프로젝트
+
+## 추가 자료
+
+- [공식 문서](https://tailwindcss.com)
+- [Tailwind UI](https://tailwindui.com)
+- [Tailwind 플레이그라운드](https://play.tailwindcss.com)
+

@@ -819,6 +819,29 @@ export const sidebar = [
     ],
   }),
 
+  // --- APP Tab (Frontend Technologies) ---
+  {
+    label: "App",
+    items: [
+      {
+        label: "Frontend",
+        collapsed: true,
+        items: [
+          "app/front/react",
+          "app/front/vue",
+          "app/front/angular",
+          "app/front/nextjs",
+          "app/front/nuxt",
+          "app/front/svelte",
+          "app/front/typescript",
+          "app/front/tailwind",
+          "app/front/redux",
+          "app/front/react-query",
+        ],
+      },
+    ],
+  },
+
   // --- CONTRIBUTE Tab ---
   // TODO" For now hide the contribute section until we have more content and a better icon
   /*group("contribute", {

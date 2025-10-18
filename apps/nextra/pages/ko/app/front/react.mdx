@@ -1,0 +1,61 @@
+# React
+
+React는 사용자 인터페이스를 구축하기 위한 JavaScript 라이브러리입니다.
+
+## 주요 특징
+
+- **컴포넌트 기반**: 재사용 가능한 UI 컴포넌트를 만들 수 있습니다
+- **가상 DOM**: 효율적인 렌더링을 위해 가상 DOM을 사용합니다
+- **단방향 데이터 흐름**: 예측 가능한 상태 관리를 제공합니다
+- **풍부한 생태계**: 다양한 라이브러리와 도구를 제공합니다
+
+## 설치하기
+
+```bash
+npx create-react-app my-app
+cd my-app
+npm start
+```
+
+또는 Vite를 사용하여:
+
+```bash
+npm create vite@latest my-app -- --template react
+cd my-app
+npm install
+npm run dev
+```
+
+## 기본 예제
+
+```jsx
+import { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <p>카운트: {count}</p>
+      <button onClick={() => setCount(count + 1)}>
+        증가
+      </button>
+    </div>
+  );
+}
+
+export default Counter;
+```
+
+## 언제 사용하나요?
+
+- 대규모 단일 페이지 애플리케이션(SPA) 구축
+- 복잡한 사용자 인터페이스 개발
+- 재사용 가능한 컴포넌트 라이브러리 제작
+- 모바일 앱 개발 (React Native)
+
+## 추가 자료
+
+- [공식 문서](https://react.dev)
+- [React 튜토리얼](https://react.dev/learn)
+
