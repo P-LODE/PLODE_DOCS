@@ -67,7 +67,7 @@ export default defineConfig({
           ]),
         ]
       : []),
-    ogImagesIntegration(),
+    // ogImagesIntegration(), // TODO: 나중에 확장 예정
     firebaseIntegration(),
     starlight({
       title: SITE_TITLES,
