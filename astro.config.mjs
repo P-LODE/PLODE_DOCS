@@ -68,7 +68,7 @@ export default defineConfig({
         ]
       : []),
     // ogImagesIntegration(), // TODO: 나중에 확장 예정
-    firebaseIntegration(),
+    // firebaseIntegration(), // TODO: Firebase 계정 생성 후 활성화
     starlight({
       title: SITE_TITLES,
       // logo: {
